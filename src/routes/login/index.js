@@ -1,25 +1,39 @@
 import { useState } from 'react';
-import { login } from '../../services/ecom';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+	login,
+	selectAuthPending,
+	selectAuthFailed,
+} from '../../store/authSlice';
 
 /**
  * Login page component
- * 
- * Contains the login form and invokes login method on API endpoint
+ *
+ * Contains the login form and dispatches login thunk to redux store
  */
 export default function Login() {
+	// Store input values in state
 	const [email, setEmail] = useState();
 	const [password, setPassword] = useState();
 
+	// Use dispatch to communicate with auth redux store
+	const dispatch = useDispatch();
+
+	// Get information about authentication state from auth redux store
+	const authPending = useSelector(selectAuthPending);
+	const authFailed = useSelector(selectAuthFailed);
+
 	// Handle login form submission
-	async function handleSubmit(e) {
+	function handleSubmit(e) {
 		e.preventDefault();
 
-		// Pass submitted values to login method from services/ecom
-		await login(email, password);
+		// Dispatch login method from auth redux store
+		dispatch(login({ email, password }));
 	}
 
 	return (
 		<form onSubmit={handleSubmit}>
+			{/* Email input field */}
 			<label htmlFor='email'>Email</label>
 			<input
 				id='email'
@@ -28,6 +42,7 @@ export default function Login() {
 				onChange={e => setEmail(e.target.value)}
 			/>
 
+			{/* Password input field */}
 			<label htmlFor='password'>Password</label>
 			<input
 				id='password'
@@ -36,7 +51,14 @@ export default function Login() {
 				onChange={e => setPassword(e.target.value)}
 			/>
 
-			<input type='submit' />
+			{/* Submit button */}
+			<input type='submit' value='Submit' />
+
+			{/* Display when authentication is pending */}
+			{authPending && <p>Logging in...</p>}
+
+			{/* Display when authentication has failed */}
+			{authFailed && <p>Failed to login</p>}
 		</form>
 	);
 }

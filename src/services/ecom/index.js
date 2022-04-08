@@ -8,6 +8,7 @@ const routes = {
  * Send login credentials to the login API endpoint
  * @param {string} email User's email
  * @param {string} password User's password
+ * @returns True if login was successful, false otherwise
  */
 export async function login(email, password) {
 	try {
@@ -20,8 +21,10 @@ export async function login(email, password) {
 			}),
 		});
 
-		console.log(response);
+		return response.ok;
 	} catch (err) {
 		console.error(err);
+
+		return false;
 	}
 }
