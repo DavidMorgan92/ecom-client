@@ -1,6 +1,7 @@
 const routes = {
 	base: () => process.env.REACT_APP_ECOM_API_URL,
 	login: () => new URL('/auth/login', routes.base()),
+	logout: () => new URL('/auth/logout', routes.base()),
 	register: () => new URL('/auth/register', routes.base()),
 };
 
@@ -19,6 +20,24 @@ export async function login(email, password) {
 				email,
 				password,
 			}),
+		});
+
+		return response.ok;
+	} catch (err) {
+		console.error(err);
+
+		return false;
+	}
+}
+
+/**
+ * Send a logout request to the API endpoint
+ * @returns True if request was successful, false otherwise
+ */
+export async function logout() {
+	try {
+		const response = await fetch(routes.logout(), {
+			method: 'POST'
 		});
 
 		return response.ok;
