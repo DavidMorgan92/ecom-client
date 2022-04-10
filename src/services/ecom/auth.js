@@ -54,7 +54,7 @@ export async function logout() {
 		// Log error
 		console.error(err);
 
-		// REturn false if an error occurred
+		// Return false if an error occurred
 		return false;
 	}
 }
