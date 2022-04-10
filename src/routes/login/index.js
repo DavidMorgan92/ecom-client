@@ -13,8 +13,8 @@ import {
  */
 export default function Login() {
 	// Store input values in state
-	const [email, setEmail] = useState();
-	const [password, setPassword] = useState();
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 
 	// Use dispatch to communicate with auth redux store
 	const dispatch = useDispatch();
@@ -51,8 +51,8 @@ export default function Login() {
 				onChange={e => setPassword(e.target.value)}
 			/>
 
-			{/* Submit button */}
-			<input type='submit' value='Submit' />
+			{/* Submit button (disable if authentication is pending) */}
+			<input type='submit' value='Submit' disabled={authPending} />
 
 			{/* Display when authentication is pending */}
 			{authPending && <p>Logging in...</p>}
