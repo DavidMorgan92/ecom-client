@@ -4,6 +4,7 @@ import store from './store';
 import Home from './routes/home';
 import Login from './routes/login';
 import Register from './routes/register';
+import Account from './routes/account';
 import Header from './components/header';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
 							<Route index element={<Home />} />
 							<Route path='login' element={<Login />} />
 							<Route path='register' element={<Register />} />
+							<Route path='account' element={<Account />} />
 						</Route>
 					</Routes>
 				</main>
