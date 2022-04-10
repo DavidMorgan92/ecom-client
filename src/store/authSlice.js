@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import * as ecom from '../services/ecom';
+import * as auth from '../services/ecom/auth';
 
 /**
  * Initial state of the auth slice
@@ -16,6 +16,12 @@ const initialState = {
 
 	/** The email address of the authenticated user */
 	email: null,
+
+	/** Is a registration request pending? */
+	registrationPending: false,
+
+	/** Did the last registration request fail? */
+	registrationFailed: false,
 };
 
 /**
@@ -24,7 +30,8 @@ const initialState = {
 export const login = createAsyncThunk(
 	'auth/login',
 	async ({ email, password }) => {
-		const success = await ecom.login(email, password);
+		// Login through ECOM auth service
+		const success = await auth.login(email, password);
 
 		// Return the success status and the email address as the action payload
 		return {
@@ -38,12 +45,35 @@ export const login = createAsyncThunk(
  * Dispatch this thunk to request logout
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
-	const success = await ecom.logout();
+	// Logout through ECOM auth service
+	const success = await auth.logout();
 
+	// Return the success status as the action payload
 	return {
 		success,
 	};
 });
+
+/**
+ * Dispatch this thunk to request registration of a new account
+ */
+export const register = createAsyncThunk(
+	'auth/register',
+	async ({ firstName, lastName, email, password }) => {
+		// Send registration request through ECOM auth service
+		const accountInfo = await auth.register(
+			firstName,
+			lastName,
+			email,
+			password,
+		);
+
+		// Return the account info as the action payload
+		return {
+			accountInfo,
+		};
+	},
+);
 
 const authSlice = createSlice({
 	name: 'auth',
@@ -97,6 +127,24 @@ const authSlice = createSlice({
 			state.authFailed = false;
 			state.email = null;
 		},
+
+		/** Register request is pending a response */
+		[register.pending]: state => {
+			state.registrationPending = true;
+			state.registrationFailed = false;
+		},
+
+		/** Register request failed */
+		[register.rejected]: state => {
+			state.registrationPending = false;
+			state.registrationFailed = true;
+		},
+
+		/** Register request succeeded */
+		[register.fulfilled]: state => {
+			state.registrationPending = false;
+			state.registrationFailed = false;
+		},
 	},
 });
 
@@ -111,5 +159,12 @@ export const selectAuthFailed = state => state.auth.authFailed;
 
 /** Select the authenticated user's email */
 export const selectEmail = state => state.auth.email;
+
+/** Select registration pending state */
+export const selectRegistrationPending = state =>
+	state.auth.registrationPending;
+
+/** Select registration failed state */
+export const selectRegistrationFailed = state => state.auth.registrationFailed;
 
 export default authSlice.reducer;
