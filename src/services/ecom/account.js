@@ -13,7 +13,9 @@ const routes = {
 export async function getAccountInfo() {
 	try {
 		// Send get request to API endpoint
-		const response = await fetch(routes.account());
+		const response = await fetch(routes.account(), {
+			credentials: 'include',
+		});
 
 		// Return false if response was not OK
 		if (!response.ok) {
@@ -46,6 +48,7 @@ export async function updateAccountInfo(firstName, lastName) {
 		const response = await fetch(routes.account(), {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
 			body: JSON.stringify({
 				firstName,
 				lastName,

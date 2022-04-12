@@ -20,6 +20,7 @@ export async function login(email, password) {
 		const response = await fetch(routes.login(), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
 			body: JSON.stringify({
 				email,
 				password,
@@ -46,6 +47,7 @@ export async function logout() {
 		// Send logout request to API endpoint
 		const response = await fetch(routes.logout(), {
 			method: 'POST',
+			credentials: 'include',
 		});
 
 		// Return true if response was OK
