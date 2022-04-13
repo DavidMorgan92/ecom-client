@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+	getAccountInfo,
+	selectGetPending,
+	selectGetFailed,
 	updateAccountInfo,
 	selectUpdatePending,
 	selectUpdateFailed,
@@ -20,8 +23,26 @@ export default function Account() {
 	const dispatch = useDispatch();
 
 	// Get information about account information update state from account redux store
+	const getPending = useSelector(selectGetPending);
+	const getFailed = useSelector(selectGetFailed);
 	const updatePending = useSelector(selectUpdatePending);
 	const updateFailed = useSelector(selectUpdateFailed);
+
+	// Get account information on mount
+	useEffect(() => {
+		dispatch(getAccountInfo())
+			.then(result => {
+				if (result.payload.accountInfo) {
+					// Assign values gotten from API to the input fields
+					setFirstName(result.payload.accountInfo.firstName);
+					setLastName(result.payload.accountInfo.lastName);
+				} else {
+					// If get request failed, blank out input fields
+					setFirstName('');
+					setLastName('');
+				}
+			});
+	}, [dispatch]);
 
 	// Handle update form submission
 	function handleSubmit(e) {
@@ -39,7 +60,9 @@ export default function Account() {
 				id='firstName'
 				name='firstName'
 				type='text'
+				value={firstName}
 				onChange={e => setFirstName(e.target.value)}
+				disabled={getPending || updatePending}
 			/>
 
 			{/* Last name input field */}
@@ -48,11 +71,23 @@ export default function Account() {
 				id='lastName'
 				name='lastName'
 				type='text'
+				value={lastName}
 				onChange={e => setLastName(e.target.value)}
+				disabled={getPending || updatePending}
 			/>
 
-			{/* Submit button (disabled if account update is pending) */}
-			<input type='submit' value='Submit' disabled={updatePending} />
+			{/* Submit button (disabled if account get or update is pending) */}
+			<input
+				type='submit'
+				value='Submit'
+				disabled={getPending || updatePending}
+			/>
+
+			{/* Display when get is pending */}
+			{getPending && <p>Loading account information...</p>}
+
+			{/* Display when get has failed */}
+			{getFailed && <p>Failed to get account information</p>}
 
 			{/* Display when update is pending */}
 			{updatePending && <p>Updating...</p>}
