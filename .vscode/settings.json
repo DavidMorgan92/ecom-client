@@ -1,3 +1,23 @@
 {
-	"cSpell.words": ["ECOM"]
+	"cSpell.words": ["ECOM"],
+	"workbench.colorCustomizations": {
+		"activityBar.activeBackground": "#c84654",
+		"activityBar.activeBorder": "#49c53a",
+		"activityBar.background": "#c84654",
+		"activityBar.foreground": "#e7e7e7",
+		"activityBar.inactiveForeground": "#e7e7e799",
+		"activityBarBadge.background": "#49c53a",
+		"activityBarBadge.foreground": "#15202b",
+		"sash.hoverBorder": "#c84654",
+		"statusBar.background": "#a9323f",
+		"statusBar.foreground": "#e7e7e7",
+		"statusBarItem.hoverBackground": "#c84654",
+		"statusBarItem.remoteBackground": "#a9323f",
+		"statusBarItem.remoteForeground": "#e7e7e7",
+		"titleBar.activeBackground": "#a9323f",
+		"titleBar.activeForeground": "#e7e7e7",
+		"titleBar.inactiveBackground": "#a9323f99",
+		"titleBar.inactiveForeground": "#e7e7e799"
+	},
+	"peacock.color": "#a9323f"
 }
