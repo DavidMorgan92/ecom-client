@@ -8,7 +8,7 @@ const routes = {
 
 /**
  * Get the account information of the authenticated user
- * @returns Account info object if the request was successful, false otherwise
+ * @returns Account info object if the request was successful, null otherwise
  */
 export async function getAccountInfo() {
 	try {
@@ -17,9 +17,9 @@ export async function getAccountInfo() {
 			credentials: 'include',
 		});
 
-		// Return false if response was not OK
+		// Return null if response was not OK
 		if (!response.ok) {
-			return false;
+			return null;
 		}
 
 		// Get account info returned by API
@@ -31,8 +31,8 @@ export async function getAccountInfo() {
 		// Log error
 		console.error(err);
 
-		// Return false if an error occurred
-		return false;
+		// Return null if an error occurred
+		return null;
 	}
 }
 
@@ -40,7 +40,7 @@ export async function getAccountInfo() {
  * Update the authenticated user's account information
  * @param {string} firstName User's new first name
  * @param {string} lastName User's new last name
- * @returns Account info object i the request was successful, false otherwise
+ * @returns Account info object if the request was successful, null otherwise
  */
 export async function updateAccountInfo(firstName, lastName) {
 	try {
@@ -55,9 +55,9 @@ export async function updateAccountInfo(firstName, lastName) {
 			}),
 		});
 
-		// Return false if response was not OK
+		// Return null if response was not OK
 		if (!response.ok) {
-			return false;
+			return null;
 		}
 
 		// Get account info returned by API
@@ -69,7 +69,7 @@ export async function updateAccountInfo(firstName, lastName) {
 		// Log error
 		console.error(err);
 
-		// Return false if an error occurred
-		return false;
+		// Return null if an error occurred
+		return null;
 	}
 }

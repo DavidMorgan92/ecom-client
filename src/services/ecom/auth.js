@@ -67,7 +67,7 @@ export async function logout() {
  * @param {string} lastName User's last name
  * @param {string} email User's email address
  * @param {string} password User's password
- * @returns Account info object if the request was successful, false otherwise
+ * @returns Account info object if the request was successful, null otherwise
  */
 export async function register(firstName, lastName, email, password) {
 	try {
@@ -83,9 +83,9 @@ export async function register(firstName, lastName, email, password) {
 			}),
 		});
 
-		// Return false if response was not OK
+		// Return null if response was not OK
 		if (!response.ok) {
-			return false;
+			return null;
 		}
 
 		// Get account info returned by API
@@ -97,7 +97,7 @@ export async function register(firstName, lastName, email, password) {
 		// Log error
 		console.error(err);
 
-		// Return false if an error occurred
-		return false;
+		// Return null if an error occurred
+		return null;
 	}
 }
