@@ -31,16 +31,16 @@ export default function Account() {
 	// Get account information on mount
 	useEffect(() => {
 		dispatch(getAccountInfo())
-			.then(result => {
-				if (result.payload.accountInfo) {
-					// Assign values gotten from API to the input fields
-					setFirstName(result.payload.accountInfo.firstName);
-					setLastName(result.payload.accountInfo.lastName);
-				} else {
-					// If get request failed, blank out input fields
-					setFirstName('');
-					setLastName('');
-				}
+			.unwrap()
+			.then(payload => {
+				// Assign values gotten from API to the input fields
+				setFirstName(payload.accountInfo.firstName);
+				setLastName(payload.accountInfo.lastName);
+			})
+			.catch(() => {
+				// If get request failed, blank out input fields
+				setFirstName('');
+				setLastName('');
 			});
 	}, [dispatch]);
 

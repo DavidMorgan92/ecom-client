@@ -31,11 +31,10 @@ export const login = createAsyncThunk(
 	'auth/login',
 	async ({ email, password }) => {
 		// Login through ECOM auth service
-		const success = await auth.login(email, password);
+		await auth.login(email, password);
 
 		// Return the success status and the email address as the action payload
 		return {
-			success,
 			email,
 		};
 	},
@@ -46,12 +45,7 @@ export const login = createAsyncThunk(
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
 	// Logout through ECOM auth service
-	const success = await auth.logout();
-
-	// Return the success status as the action payload
-	return {
-		success,
-	};
+	await auth.logout();
 });
 
 /**
@@ -98,9 +92,9 @@ const authSlice = createSlice({
 		/** The login request succeeded */
 		[login.fulfilled]: (state, action) => {
 			// action.payload is a boolean indicating the success of the login request
-			state.authenticated = action.payload.success;
+			state.authenticated = true;
 			state.authPending = false;
-			state.authFailed = !state.authenticated;
+			state.authFailed = false;
 			state.email = action.payload.email;
 		},
 

@@ -1,7 +1,7 @@
 /**
  * Routes to API endpoints
  */
-const routes = {
+export const routes = {
 	base: () => process.env.REACT_APP_ECOM_API_URL,
 	login: () => new URL('/auth/login', routes.base()),
 	logout: () => new URL('/auth/logout', routes.base()),
@@ -12,52 +12,38 @@ const routes = {
  * Send login credentials to the login API endpoint
  * @param {string} email User's email
  * @param {string} password User's password
- * @returns True if login was successful, false otherwise
+ * @throws Will throw if network response is not OK
  */
 export async function login(email, password) {
-	try {
-		// Send login request to API endpoint
-		const response = await fetch(routes.login(), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			credentials: 'include',
-			body: JSON.stringify({
-				email,
-				password,
-			}),
-		});
+	// Send login request to API endpoint
+	const response = await fetch(routes.login(), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({
+			email,
+			password,
+		}),
+	});
 
-		// Return true if response was OK
-		return response.ok;
-	} catch (err) {
-		// Log error
-		console.error(err);
-
-		// Return false if an error occurred
-		return false;
+	if (!response.ok) {
+		throw new Error(`POST ${routes.login()} response not OK`);
 	}
 }
 
 /**
  * Send a logout request to the API endpoint
- * @returns True if request was successful, false otherwise
+ * @throws Will throw if network response is not OK
  */
 export async function logout() {
-	try {
-		// Send logout request to API endpoint
-		const response = await fetch(routes.logout(), {
-			method: 'POST',
-			credentials: 'include',
-		});
+	// Send logout request to API endpoint
+	const response = await fetch(routes.logout(), {
+		method: 'POST',
+		credentials: 'include',
+	});
 
-		// Return true if response was OK
-		return response.ok;
-	} catch (err) {
-		// Log error
-		console.error(err);
-
-		// Return false if an error occurred
-		return false;
+	if (!response.ok) {
+		throw new Error(`POST ${routes.logout()} response not OK`);
 	}
 }
 
@@ -67,37 +53,30 @@ export async function logout() {
  * @param {string} lastName User's last name
  * @param {string} email User's email address
  * @param {string} password User's password
- * @returns Account info object if the request was successful, null otherwise
+ * @returns Account info object if the request was successful
+ * @throws Will throw if network response is not OK
  */
 export async function register(firstName, lastName, email, password) {
-	try {
-		// Send register request to API endpoint
-		const response = await fetch(routes.register(), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				firstName,
-				lastName,
-				email,
-				password,
-			}),
-		});
+	// Send register request to API endpoint
+	const response = await fetch(routes.register(), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			firstName,
+			lastName,
+			email,
+			password,
+		}),
+	});
 
-		// Return null if response was not OK
-		if (!response.ok) {
-			return null;
-		}
-
-		// Get account info returned by API
-		const accountInfo = await response.json();
-
-		// Return account info
-		return accountInfo;
-	} catch (err) {
-		// Log error
-		console.error(err);
-
-		// Return null if an error occurred
-		return null;
+	// Return null if response was not OK
+	if (!response.ok) {
+		throw new Error(`POST ${routes.register()} response not OK`);
 	}
+
+	// Get account info returned by API
+	const accountInfo = await response.json();
+
+	// Return account info
+	return accountInfo;
 }
