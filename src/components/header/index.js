@@ -40,7 +40,7 @@ export default function Header() {
 	const authenticatedGroup = (
 		<>
 			{/* Show the authenticated user's email */}
-			<Link to='/account'>{email}</Link>
+			<Link to='/account' data-testid='account-link'>{email}</Link>
 
 			{/* Show a logout button */}
 			<button onClick={handleLogout}>Logout</button>
