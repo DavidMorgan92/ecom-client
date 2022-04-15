@@ -36,6 +36,9 @@ describe('Login page', () => {
 		expect(screen.getByLabelText('Email')).toHaveValue('');
 		expect(screen.getByLabelText('Password')).toHaveValue('');
 
+		// Expect submit button to be enabled
+		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
+
 		// Expect no message to be shown
 		expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to login')).not.toBeInTheDocument();
