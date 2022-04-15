@@ -7,7 +7,7 @@ import {
 import { Provider } from 'react-redux';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import Account from './';
+import Account from '.';
 import store from '../../store';
 import { routes } from '../../services/ecom/account';
 
