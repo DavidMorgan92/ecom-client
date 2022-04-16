@@ -262,10 +262,12 @@ describe('Register page', () => {
 		fireEvent.click(screen.getByDisplayValue('Submit'));
 
 		// Expect validation warning message to be shown
-		expect(await screen.findByText('Password must be 8 characters or more')).toBeVisible();
+		expect(
+			await screen.findByText('Password must be 8 characters or more'),
+		).toBeVisible();
 	});
 
-	it('shows invalid confirm password warning when it doesn\'t match the password field', async () => {
+	it("shows invalid confirm password warning when it doesn't match the password field", async () => {
 		// Render component
 		render(
 			<Provider store={store}>

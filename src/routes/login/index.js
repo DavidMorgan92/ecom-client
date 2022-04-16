@@ -45,16 +45,14 @@ export default function Login() {
 			onSubmit={handleSubmit}
 			validationSchema={loginSchema}
 		>
-			{({errors, touched}) => (
+			{({ errors, touched }) => (
 				<Form>
 					{/* Email input field */}
 					<label htmlFor='email'>Email</label>
 					<Field id='email' name='email' type='email' />
 
 					{/* Email input field validation errors */}
-					{errors.email && touched.email ? (
-						<span>{errors.email}</span>
-					) : null}
+					{errors.email && touched.email ? <span>{errors.email}</span> : null}
 
 					{/* Password input field */}
 					<label htmlFor='password'>Password</label>

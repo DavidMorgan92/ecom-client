@@ -46,7 +46,7 @@ export default function Account() {
 	}
 
 	// Store form's initial values here. Form will re-initialize when they change.
-	const initialValues = useRef({ firstName: '', lastName: ''});
+	const initialValues = useRef({ firstName: '', lastName: '' });
 
 	// Get account information on mount
 	useEffect(() => {
