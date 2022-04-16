@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import {
 	login,
 	selectAuthPending,
@@ -7,15 +8,24 @@ import {
 } from '../../store/authSlice';
 
 /**
+ * Validation schema for login form
+ */
+const loginSchema = Yup.object().shape({
+	// Email is required and must be a valid email address
+	email: Yup.string()
+		.email('Invalid email address')
+		.required('Email address is required'),
+
+	// Password is required
+	password: Yup.string().required('Password is required'),
+});
+
+/**
  * Login page component
  *
  * Contains the login form and dispatches login thunk to redux store
  */
 export default function Login() {
-	// Store input values in state
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-
 	// Use dispatch to communicate with auth redux store
 	const dispatch = useDispatch();
 
@@ -24,41 +34,47 @@ export default function Login() {
 	const authFailed = useSelector(selectAuthFailed);
 
 	// Handle login form submission
-	function handleSubmit(e) {
-		e.preventDefault();
-
+	function handleSubmit(values) {
 		// Dispatch login method from auth redux store
-		dispatch(login({ email, password }));
+		dispatch(login(values));
 	}
 
 	return (
-		<form onSubmit={handleSubmit}>
-			{/* Email input field */}
-			<label htmlFor='email'>Email</label>
-			<input
-				id='email'
-				name='email'
-				type='email'
-				onChange={e => setEmail(e.target.value)}
-			/>
+		<Formik
+			initialValues={{ email: '', password: '' }}
+			onSubmit={handleSubmit}
+			validationSchema={loginSchema}
+		>
+			{({errors, touched}) => (
+				<Form>
+					{/* Email input field */}
+					<label htmlFor='email'>Email</label>
+					<Field id='email' name='email' type='email' />
 
-			{/* Password input field */}
-			<label htmlFor='password'>Password</label>
-			<input
-				id='password'
-				name='password'
-				type='password'
-				onChange={e => setPassword(e.target.value)}
-			/>
+					{/* Email input field validation errors */}
+					{errors.email && touched.email ? (
+						<span>{errors.email}</span>
+					) : null}
 
-			{/* Submit button (disable if authentication is pending) */}
-			<input type='submit' value='Submit' disabled={authPending} />
+					{/* Password input field */}
+					<label htmlFor='password'>Password</label>
+					<Field id='password' name='password' type='password' />
 
-			{/* Display when authentication is pending */}
-			{authPending && <p>Logging in...</p>}
+					{/* Password input field validation errors */}
+					{errors.password && touched.password ? (
+						<span>{errors.password}</span>
+					) : null}
 
-			{/* Display when authentication has failed */}
-			{authFailed && <p>Failed to login</p>}
-		</form>
+					{/* Submit button */}
+					<input type='submit' value='Submit' disabled={authPending} />
+
+					{/* Display when authentication is pending */}
+					{authPending && <p>Logging in...</p>}
+
+					{/* Display when authentication has failed */}
+					{authFailed && <p>Failed to login</p>}
+				</Form>
+			)}
+		</Formik>
 	);
 }

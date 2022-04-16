@@ -134,4 +134,38 @@ describe('Login page', () => {
 		expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to login')).toBeInTheDocument();
 	});
+
+	it('shows required field warnings when fields are empty', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Login />
+			</Provider>,
+		);
+
+		// Submit form with empty input fields
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning messages to be shown
+		expect(await screen.findByText('Email address is required')).toBeVisible();
+		expect(await screen.findByText('Password is required')).toBeVisible();
+	});
+
+	it('shows invalid email warning when email field is invalid', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Login />
+			</Provider>,
+		);
+
+		// Input invalid email and submit form
+		fireEvent.change(screen.getByLabelText('Email'), {
+			target: { value: 'dave' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(await screen.findByText('Invalid email address')).toBeVisible();
+	});
 });
