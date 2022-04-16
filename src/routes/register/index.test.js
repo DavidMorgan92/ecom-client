@@ -167,4 +167,122 @@ describe('Register page', () => {
 		expect(screen.queryByText('Registering...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to register')).toBeInTheDocument();
 	});
+
+	it('shows required field warnings when fields are empty', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Submit form with empty input fields
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning messages to be shown
+		expect(await screen.findByText('First name is required')).toBeVisible();
+		expect(await screen.findByText('Last name is required')).toBeVisible();
+		expect(await screen.findByText('Email address is required')).toBeVisible();
+		expect(await screen.findByText('Password is required')).toBeVisible();
+		expect(
+			await screen.findByText('Confirm password is required'),
+		).toBeVisible();
+	});
+
+	it('shows invalid first name warning when first name field is > 20 characters', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Input first name > 20 characters and submit form
+		fireEvent.change(screen.getByLabelText('First name'), {
+			target: { value: '123456789012345678901' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(
+			await screen.findByText('First name cannot be more than 20 characters'),
+		).toBeVisible();
+	});
+
+	it('shows invalid last name warning when last name field is > 20 characters', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Input last name > 20 characters and submit form
+		fireEvent.change(screen.getByLabelText('Last name'), {
+			target: { value: '123456789012345678901' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(
+			await screen.findByText('Last name cannot be more than 20 characters'),
+		).toBeVisible();
+	});
+
+	it('shows invalid email warning when email field is invalid', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Input invalid email and submit form
+		fireEvent.change(screen.getByLabelText('Email'), {
+			target: { value: 'dave' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(await screen.findByText('Invalid email address')).toBeVisible();
+	});
+
+	it('shows invalid password warning when password field is < 8 characters', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Input password < 8 characters and submit form
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'short12' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(await screen.findByText('Password must be 8 characters or more')).toBeVisible();
+	});
+
+	it('shows invalid confirm password warning when it doesn\'t match the password field', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Register />
+			</Provider>,
+		);
+
+		// Input non-matching passwords and submit form
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'password' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm password'), {
+			target: { value: 'passwords' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(await screen.findByText('Passwords must match')).toBeVisible();
+	});
 });
