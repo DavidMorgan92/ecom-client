@@ -65,7 +65,7 @@ export default function Login() {
 						<span>{errors.password}</span>
 					) : null}
 
-					{/* Submit button */}
+					{/* Submit button (disable when authentication is pending) */}
 					<input type='submit' value='Submit' disabled={authPending} />
 
 					{/* Display when authentication is pending */}

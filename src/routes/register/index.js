@@ -108,7 +108,7 @@ export default function Register() {
 						<span>{errors.confirmPassword}</span>
 					) : null}
 
-					{/* Submit button */}
+					{/* Submit button (disable when registration is pending) */}
 					<input type='submit' value='Submit' disabled={registrationPending} />
 
 					{/* Display when registration is pending */}
