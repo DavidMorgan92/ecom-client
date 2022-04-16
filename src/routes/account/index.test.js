@@ -3,6 +3,7 @@ import {
 	screen,
 	fireEvent,
 	waitForElementToBeRemoved,
+	waitFor,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { rest } from 'msw';
@@ -51,9 +52,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue('');
 		expect(screen.getByLabelText('Last name')).toHaveValue('');
 
-		// Expect input fields to be disabled
-		expect(screen.getByLabelText('First name')).toBeDisabled();
-		expect(screen.getByLabelText('Last name')).toBeDisabled();
+		// Expect submit button to be disabled
 		expect(screen.getByDisplayValue('Submit')).toBeDisabled();
 
 		// Expect only get pending message to be shown
@@ -71,13 +70,14 @@ describe('Account page', () => {
 			screen.queryByText('Loading account information...'),
 		);
 
-		// Expect gotten values to be in the input fields
-		expect(screen.getByLabelText('First name')).toHaveValue('David');
-		expect(screen.getByLabelText('Last name')).toHaveValue('Morgan');
+		// Wait for Formik form to re-render
+		waitFor(() => {
+			// Expect gotten values to be in the input fields
+			expect(screen.getByLabelText('First name')).toHaveValue('David');
+			expect(screen.getByLabelText('Last name')).toHaveValue('Morgan');
+		});
 
-		// Expect input fields to be enabled
-		expect(screen.getByLabelText('First name')).toBeEnabled();
-		expect(screen.getByLabelText('Last name')).toBeEnabled();
+		// Expect submit button to be enabled
 		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
 
 		// Expect no message to be shown
@@ -113,9 +113,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue('');
 		expect(screen.getByLabelText('Last name')).toHaveValue('');
 
-		// Expect input fields to be disabled
-		expect(screen.getByLabelText('First name')).toBeDisabled();
-		expect(screen.getByLabelText('Last name')).toBeDisabled();
+		// Expect submit button to be disabled
 		expect(screen.getByDisplayValue('Submit')).toBeDisabled();
 
 		// Expect only get pending message to be shown
@@ -137,9 +135,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue('');
 		expect(screen.getByLabelText('Last name')).toHaveValue('');
 
-		// Expect input fields to be enabled
-		expect(screen.getByLabelText('First name')).toBeEnabled();
-		expect(screen.getByLabelText('Last name')).toBeEnabled();
+		// Expect submit button to be enabled
 		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
 
 		// Expect get error message to be shown
@@ -186,9 +182,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue(newFirstName);
 		expect(screen.getByLabelText('Last name')).toHaveValue(newLastName);
 
-		// Expect input fields to be disabled
-		expect(screen.getByLabelText('First name')).toBeDisabled();
-		expect(screen.getByLabelText('Last name')).toBeDisabled();
+		// Expect submit button to be disabled
 		expect(screen.getByDisplayValue('Submit')).toBeDisabled();
 
 		// Expect only update pending message to be shown
@@ -208,9 +202,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue(newFirstName);
 		expect(screen.getByLabelText('Last name')).toHaveValue(newLastName);
 
-		// Expect input fields to be enabled
-		expect(screen.getByLabelText('First name')).toBeEnabled();
-		expect(screen.getByLabelText('Last name')).toBeEnabled();
+		// Expect submit button to be enabled
 		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
 
 		// Expect no message to be shown
@@ -264,9 +256,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue(newFirstName);
 		expect(screen.getByLabelText('Last name')).toHaveValue(newLastName);
 
-		// Expect input fields to be disabled
-		expect(screen.getByLabelText('First name')).toBeDisabled();
-		expect(screen.getByLabelText('Last name')).toBeDisabled();
+		// Expect submit button to be disabled
 		expect(screen.getByDisplayValue('Submit')).toBeDisabled();
 
 		// Expect only update pending message to be shown
@@ -286,9 +276,7 @@ describe('Account page', () => {
 		expect(screen.getByLabelText('First name')).toHaveValue(newFirstName);
 		expect(screen.getByLabelText('Last name')).toHaveValue(newLastName);
 
-		// Expect input fields to be enabled
-		expect(screen.getByLabelText('First name')).toBeEnabled();
-		expect(screen.getByLabelText('Last name')).toBeEnabled();
+		// Expect submit button to be enabled
 		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
 
 		// Expect update failed message to be shown
@@ -300,5 +288,92 @@ describe('Account page', () => {
 		).not.toBeInTheDocument();
 		expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).toBeInTheDocument();
+	});
+
+	it('shows required field warnings when fields are empty', async () => {
+		// Cause server to return empty values when they're gotten on mount
+		server.use(
+			rest.get(routes.account().href, (req, res, ctx) => {
+				return res(ctx.json({ firstName: '', lastName: '' }));
+			}),
+		);
+
+		// Render component
+		render(
+			<Provider store={store}>
+				<Account />
+			</Provider>,
+		);
+
+		// Wait for get pending message to be shown
+		await screen.findByText('Loading account information...');
+
+		// Wait for get pending message to disappear
+		await waitForElementToBeRemoved(
+			screen.queryByText('Loading account information...'),
+		);
+
+		// Submit form with empty input fields
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning messages to be shown
+		expect(await screen.findByText('First name is required')).toBeVisible();
+		expect(await screen.findByText('Last name is required')).toBeVisible();
+	});
+
+	it('shows invalid first name warning when first name field is > 20 characters', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Account />
+			</Provider>,
+		);
+
+		// Wait for get pending message to be shown
+		await screen.findByText('Loading account information...');
+
+		// Wait for get pending message to disappear
+		await waitForElementToBeRemoved(
+			screen.queryByText('Loading account information...'),
+		);
+
+		// Input first name > 20 characters and submit form
+		fireEvent.change(screen.getByLabelText('First name'), {
+			target: { value: '123456789012345678901' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(
+			await screen.findByText('First name cannot be more than 20 characters'),
+		).toBeVisible();
+	});
+
+	it('shows invalid last name warning when last name field is > 20 characters', async () => {
+		// Render component
+		render(
+			<Provider store={store}>
+				<Account />
+			</Provider>,
+		);
+
+		// Wait for get pending message to be shown
+		await screen.findByText('Loading account information...');
+
+		// Wait for get pending message to disappear
+		await waitForElementToBeRemoved(
+			screen.queryByText('Loading account information...'),
+		);
+
+		// Input first name > 20 characters and submit form
+		fireEvent.change(screen.getByLabelText('Last name'), {
+			target: { value: '123456789012345678901' },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect validation warning message to be shown
+		expect(
+			await screen.findByText('Last name cannot be more than 20 characters'),
+		).toBeVisible();
 	});
 });

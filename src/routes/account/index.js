@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import {
 	getAccountInfo,
 	selectGetPending,
@@ -10,15 +12,24 @@ import {
 } from '../../store/accountSlice';
 
 /**
+ * Validation schema for account details form
+ */
+const accountSchema = Yup.object().shape({
+	firstName: Yup.string()
+		.required('First name is required')
+		.max(20, 'First name cannot be more than 20 characters'),
+
+	lastName: Yup.string()
+		.required('Last name is required')
+		.max(20, 'Last name cannot be more than 20 characters'),
+});
+
+/**
  * Account details page
  *
  * Contains a form for updating the user's account details
  */
 export default function Account() {
-	// Store input values in state
-	const [firstName, setFirstName] = useState('');
-	const [lastName, setLastName] = useState('');
-
 	// Use dispatch to communicate with account redux store
 	const dispatch = useDispatch();
 
@@ -28,72 +39,76 @@ export default function Account() {
 	const updatePending = useSelector(selectUpdatePending);
 	const updateFailed = useSelector(selectUpdateFailed);
 
+	// Handle update form submission
+	function handleSubmit(values) {
+		// Dispatch updateAccount method from account redux store
+		dispatch(updateAccountInfo(values));
+	}
+
+	// Store form's initial values here. Form will re-initialize when they change.
+	const initialValues = useRef({ firstName: '', lastName: ''});
+
 	// Get account information on mount
 	useEffect(() => {
 		dispatch(getAccountInfo())
 			.unwrap()
 			.then(payload => {
 				// Assign values gotten from API to the input fields
-				setFirstName(payload.accountInfo.firstName);
-				setLastName(payload.accountInfo.lastName);
+				initialValues.current = payload.accountInfo;
 			})
 			.catch(() => {
 				// If get request failed, blank out input fields
-				setFirstName('');
-				setLastName('');
+				initialValues.current = { firstName: '', lastName: '' };
 			});
 	}, [dispatch]);
 
-	// Handle update form submission
-	function handleSubmit(e) {
-		e.preventDefault();
-
-		// Dispatch updateAccount method from account redux store
-		dispatch(updateAccountInfo({ firstName, lastName }));
-	}
-
 	return (
-		<form onSubmit={handleSubmit}>
-			{/* First name input field */}
-			<label htmlFor='firstName'>First name</label>
-			<input
-				id='firstName'
-				name='firstName'
-				type='text'
-				value={firstName}
-				onChange={e => setFirstName(e.target.value)}
-				disabled={getPending || updatePending}
-			/>
+		<Formik
+			initialValues={initialValues.current}
+			onSubmit={handleSubmit}
+			validationSchema={accountSchema}
+			enableReinitialize={true}
+		>
+			{({ errors, touched }) => (
+				<Form>
+					{/* First name input field */}
+					<label htmlFor='firstName'>First name</label>
+					<Field id='firstName' name='firstName' type='text' />
 
-			{/* Last name input field */}
-			<label htmlFor='lastName'>Last name</label>
-			<input
-				id='lastName'
-				name='lastName'
-				type='text'
-				value={lastName}
-				onChange={e => setLastName(e.target.value)}
-				disabled={getPending || updatePending}
-			/>
+					{/* First name input field validation errors */}
+					{errors.firstName && touched.firstName ? (
+						<span>{errors.firstName}</span>
+					) : null}
 
-			{/* Submit button (disabled if account get or update is pending) */}
-			<input
-				type='submit'
-				value='Submit'
-				disabled={getPending || updatePending}
-			/>
+					{/* Last name input field */}
+					<label htmlFor='lastName'>Last name</label>
+					<Field id='lastName' name='lastName' type='text' />
 
-			{/* Display when get is pending */}
-			{getPending && <p>Loading account information...</p>}
+					{/* Last name input field validation errors */}
+					{errors.lastName && touched.lastName ? (
+						<span>{errors.lastName}</span>
+					) : null}
 
-			{/* Display when get has failed */}
-			{getFailed && <p>Failed to get account information</p>}
+					{/* Submit button (disable when get or update is pending) */}
+					<input
+						type='submit'
+						value='Submit'
+						disabled={getPending || updatePending}
+					/>
 
-			{/* Display when update is pending */}
-			{updatePending && <p>Updating...</p>}
+					{/* Display when get is pending */}
+					{getPending && <p>Loading account information...</p>}
 
-			{/* Display when update has failed */}
-			{updateFailed && <p>Failed to update</p>}
-		</form>
+					{/* Display when get has failed */}
+					{getFailed && <p>Failed to get account information</p>}
+
+					{/* Display when update is pending */}
+					{updatePending && <p>Updating...</p>}
+
+					{/* Display when update has failed */}
+					{updateFailed && <p>Failed to update</p>}
+				</Form>
+			)}
+		</Formik>
 	);
 }
