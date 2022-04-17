@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -33,10 +34,25 @@ export default function Login() {
 	const authPending = useSelector(selectAuthPending);
 	const authFailed = useSelector(selectAuthFailed);
 
+	// Use search params to get query string parameters
+	const [searchParams] = useSearchParams();
+
+	// Get redirect query string parameter
+	const redirectParam = searchParams.get('redirect');
+
+	// Use navigate to go to the redirect URL
+	const navigate = useNavigate();
+
 	// Handle login form submission
 	function handleSubmit(values) {
 		// Dispatch login method from auth redux store
-		dispatch(login(values));
+		dispatch(login(values))
+			.unwrap()
+			.then(() => {
+				// Navigate to redirect query parameter or home
+				navigate(redirectParam || '/')
+			})
+			.catch(() => {});
 	}
 
 	return (

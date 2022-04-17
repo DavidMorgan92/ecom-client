@@ -5,6 +5,8 @@ import {
 	waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import Login from '.';
@@ -30,6 +32,7 @@ describe('Login page', () => {
 			<Provider store={store}>
 				<Login />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Expect initial empty values to be in the input fields
@@ -45,11 +48,16 @@ describe('Login page', () => {
 	});
 
 	it('logs in on submit', async () => {
+		// Create history to track navigation, start at login page
+		const history = createMemoryHistory({ initialEntries: ['/login'] });
+
 		// Render component
 		render(
-			<Provider store={store}>
-				<Login />
-			</Provider>,
+			<Router navigator={history} location={history.location}>
+				<Provider store={store}>
+					<Login />
+				</Provider>
+			</Router>,
 		);
 
 		// Values to submit through the form
@@ -84,6 +92,61 @@ describe('Login page', () => {
 		// Expect no message to be shown
 		expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to login')).not.toBeInTheDocument();
+
+		// Expect redirect to home page on login
+		expect(history.location.pathname).toBe('/');
+	});
+
+	it('redirects to query param on successful login', async () => {
+		// Create history to track navigation, start at login page with redirect to account page
+		const history = createMemoryHistory({
+			initialEntries: ['/login?redirect=account'],
+		});
+
+		// Render component
+		render(
+			<Router navigator={history} location={history.location}>
+				<Provider store={store}>
+					<Login />
+				</Provider>
+			</Router>,
+		);
+
+		// Values to submit through the form
+		const email = 'david.morgan@gmail.com';
+		const password = 'Password01';
+
+		// Input email and password, and submit form
+		fireEvent.change(screen.getByLabelText('Email'), {
+			target: { value: email },
+		});
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: password },
+		});
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Wait for login pending message to be shown
+		await screen.findByText('Logging in...');
+
+		// Expect submit button to be disabled
+		expect(screen.getByDisplayValue('Submit')).toBeDisabled();
+
+		// Expect only login pending message to be shown
+		expect(screen.queryByText('Logging in...')).toBeInTheDocument();
+		expect(screen.queryByText('Failed to login')).not.toBeInTheDocument();
+
+		// Wait for login pending message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Logging in...'));
+
+		// Expect submit button to be enabled
+		expect(screen.getByDisplayValue('Submit')).toBeEnabled();
+
+		// Expect no message to be shown
+		expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
+		expect(screen.queryByText('Failed to login')).not.toBeInTheDocument();
+
+		// Expect redirect to account page on login
+		expect(history.location.pathname).toBe('/account');
 	});
 
 	it('handles login error', async () => {
@@ -94,11 +157,16 @@ describe('Login page', () => {
 			}),
 		);
 
+		// Create history to track navigation, start at login page
+		const history = createMemoryHistory({ initialEntries: ['/login'] });
+
 		// Render component
 		render(
-			<Provider store={store}>
-				<Login />
-			</Provider>,
+			<Router navigator={history} location={history.location}>
+				<Provider store={store}>
+					<Login />
+				</Provider>
+			</Router>,
 		);
 
 		// Values to submit through the form
@@ -133,6 +201,9 @@ describe('Login page', () => {
 		// Expect login failed message to be shown
 		expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to login')).toBeInTheDocument();
+
+		// Expect page not to redirect
+		expect(history.location.pathname).toBe('/login');
 	});
 
 	it('shows required field warnings when fields are empty', async () => {
@@ -141,6 +212,7 @@ describe('Login page', () => {
 			<Provider store={store}>
 				<Login />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Submit form with empty input fields
@@ -157,6 +229,7 @@ describe('Login page', () => {
 			<Provider store={store}>
 				<Login />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Input invalid email and submit form
