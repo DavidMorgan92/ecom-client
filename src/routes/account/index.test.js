@@ -6,11 +6,15 @@ import {
 	waitFor,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { configureStore } from '@reduxjs/toolkit';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import Account from '.';
-import store from '../../store';
 import { routes } from '../../services/ecom/account';
+import authSlice from '../../store/authSlice';
+import accountSlice from '../../store/accountSlice';
 
 // Mock backing store
 const accountInfo = {
@@ -36,13 +40,39 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+// Create mock auth store for authenticated user
+const mockStore = configureStore({
+	reducer: {
+		auth: authSlice,
+		account: accountSlice,
+	},
+	preloadedState: {
+		auth: {
+			authenticated: true,
+			authPending: false,
+			authFailed: false,
+			email: 'david.morgan@gmail.com',
+			registrationPending: false,
+			registrationFailed: false,
+		},
+		account: {
+			getPending: false,
+			getFailed: false,
+			updatePending: false,
+			updateFailed: false,
+			accountInfo: null,
+		},
+	},
+});
+
 describe('Account page', () => {
 	it('gets account information on mount', async () => {
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
@@ -101,9 +131,10 @@ describe('Account page', () => {
 
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
@@ -152,9 +183,10 @@ describe('Account page', () => {
 	it('updates account information on submit', async () => {
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Values to submit through the form
@@ -226,9 +258,10 @@ describe('Account page', () => {
 
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Values to submit through the form
@@ -300,9 +333,10 @@ describe('Account page', () => {
 
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
@@ -324,9 +358,10 @@ describe('Account page', () => {
 	it('shows invalid first name warning when first name field is > 20 characters', async () => {
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
@@ -352,9 +387,10 @@ describe('Account page', () => {
 	it('shows invalid last name warning when last name field is > 20 characters', async () => {
 		// Render component
 		render(
-			<Provider store={store}>
+			<Provider store={mockStore}>
 				<Account />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
@@ -375,5 +411,48 @@ describe('Account page', () => {
 		expect(
 			await screen.findByText('Last name cannot be more than 20 characters'),
 		).toBeVisible();
+	});
+
+	it("navigates to login page when user isn't authenticated", () => {
+		// Create mock auth store for unauthenticated user
+		const unauthenticatedStore = configureStore({
+			reducer: {
+				auth: authSlice,
+				account: accountSlice,
+			},
+			preloadedState: {
+				auth: {
+					authenticated: false,
+					authPending: false,
+					authFailed: false,
+					email: null,
+					registrationPending: false,
+					registrationFailed: false,
+				},
+				account: {
+					getPending: false,
+					getFailed: false,
+					updatePending: false,
+					updateFailed: false,
+					accountInfo: null,
+				},
+			},
+		});
+
+		// Create history to track navigation, start at account page
+		const history = createMemoryHistory({ initialEntries: ['/account'] });
+
+		// Render component
+		render(
+			<Router navigator={history} location={history.location}>
+				<Provider store={unauthenticatedStore}>
+					<Account />
+				</Provider>
+			</Router>,
+		);
+
+		// Expect redirect to login page with redirect back to account page
+		expect(history.location.pathname).toBe('/login');
+		expect(history.location.search).toBe('?redirect=/account');
 	});
 });

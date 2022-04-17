@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -10,6 +11,7 @@ import {
 	selectUpdatePending,
 	selectUpdateFailed,
 } from '../../store/accountSlice';
+import { selectAuthenticated } from '../../store/authSlice';
 
 /**
  * Validation schema for account details form
@@ -39,6 +41,9 @@ export default function Account() {
 	const updatePending = useSelector(selectUpdatePending);
 	const updateFailed = useSelector(selectUpdateFailed);
 
+	// Get information about auth state from auth redux store
+	const authenticated = useSelector(selectAuthenticated);
+
 	// Handle update form submission
 	function handleSubmit(values) {
 		// Dispatch updateAccount method from account redux store
@@ -48,8 +53,13 @@ export default function Account() {
 	// Store form's initial values here. Form will re-initialize when they change.
 	const initialValues = useRef({ firstName: '', lastName: '' });
 
+	// TODO: Stop this happening twice
 	// Get account information on mount
 	useEffect(() => {
+		if (!authenticated) {
+			return;
+		}
+
 		dispatch(getAccountInfo())
 			.unwrap()
 			.then(payload => {
@@ -60,7 +70,12 @@ export default function Account() {
 				// If get request failed, blank out input fields
 				initialValues.current = { firstName: '', lastName: '' };
 			});
-	}, [dispatch]);
+	}, [dispatch, authenticated]);
+
+	// If user isn't authenticated on mount then redirect to login with redirect back to this page
+	if (!authenticated) {
+		return <Navigate to='/login?redirect=/account' replace />;
+	}
 
 	return (
 		<Formik
