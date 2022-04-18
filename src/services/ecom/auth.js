@@ -26,6 +26,7 @@ export async function login(email, password) {
 		}),
 	});
 
+	// Throw if response was not OK
 	if (!response.ok) {
 		throw new Error(`POST ${routes.login()} response not OK`);
 	}
@@ -42,6 +43,7 @@ export async function logout() {
 		credentials: 'include',
 	});
 
+	// Throw if response was not OK
 	if (!response.ok) {
 		throw new Error(`POST ${routes.logout()} response not OK`);
 	}
@@ -69,7 +71,7 @@ export async function register(firstName, lastName, email, password) {
 		}),
 	});
 
-	// Return null if response was not OK
+	// Throw if response was not OK
 	if (!response.ok) {
 		throw new Error(`POST ${routes.register()} response not OK`);
 	}
