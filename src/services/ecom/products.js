@@ -3,8 +3,19 @@
  */
 export const routes = {
 	base: () => process.env.REACT_APP_ECOM_API_URL,
-	get: (category, name) =>
-		new URL(`/products?category=${category}&name=${name}`, routes.base()),
+	get: (category, name) => {
+		// Base URL
+		let url = '/products';
+
+		// Append search params if provided
+		const searchParams = new URLSearchParams();
+		if (category) searchParams.append('category', category);
+		if (name) searchParams.append('name', name);
+		if (category || name) url += '?' + searchParams.toString();
+
+		// Return complete URL
+		return new URL(url, routes.base());
+	},
 };
 
 /**
