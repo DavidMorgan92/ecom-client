@@ -50,7 +50,7 @@ export default function Login() {
 			.unwrap()
 			.then(() => {
 				// Navigate to redirect query parameter or home
-				navigate(redirectParam || '/')
+				navigate(redirectParam || '/');
 			})
 			.catch(() => {});
 	}

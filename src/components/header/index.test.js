@@ -1,9 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import {
-	render,
-	screen,
-	fireEvent,
-} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import Header from '.';
