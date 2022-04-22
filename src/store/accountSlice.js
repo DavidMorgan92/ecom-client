@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as account from '../services/ecom/account';
+import { logout } from './authSlice';
 
 /**
  * Initial state of the account slice
@@ -90,6 +91,12 @@ const accountSlice = createSlice({
 			state.updatePending = false;
 			state.updateFailed = false;
 			state.accountInfo = action.payload.accountInfo;
+		},
+
+		/** A logout request from the auth slice is pending */
+		[logout.pending]: state => {
+			// Null out the stored account information
+			state.accountInfo = null;
 		},
 	},
 });

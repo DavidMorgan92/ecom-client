@@ -55,6 +55,7 @@ export default function Account() {
 
 	// Get account information on mount
 	useEffect(() => {
+		// User will be redirected to login page if not authenticated, so don't get account information
 		if (!authenticated) {
 			return;
 		}
