@@ -1,3 +1,5 @@
+import Product from '../product';
+
 /**
  * Product list component
  *
@@ -6,9 +8,9 @@
 export default function ProductList({ products }) {
 	return (
 		<div>
-			{products.map(p => {
-				return <div key={p.id}>{p.name}</div>;
-			})}
+			{products.map(p => (
+				<Product key={p.id} product={p} />
+			))}
 		</div>
 	);
 }
