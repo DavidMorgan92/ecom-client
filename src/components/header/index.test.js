@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Header from '.';
 import store from '../../store';
 import authSlice from '../../store/authSlice';
+import productsSlice from '../../store/productsSlice';
 
 describe('Header component', () => {
 	it('renders correctly on mount', () => {
@@ -33,6 +34,7 @@ describe('Header component', () => {
 		const mockStore = configureStore({
 			reducer: {
 				auth: authSlice,
+				products: productsSlice,
 			},
 			preloadedState: {
 				auth: {
@@ -72,6 +74,7 @@ describe('Header component', () => {
 		const mockStore = configureStore({
 			reducer: {
 				auth: authSlice,
+				products: productsSlice,
 			},
 			preloadedState: {
 				auth: {

@@ -5,6 +5,7 @@ import {
 	selectAuthenticated,
 	selectEmail,
 } from '../../store/authSlice';
+import Search from '../search';
 
 /**
  * Header component
@@ -55,6 +56,9 @@ export default function Header() {
 			<h1>
 				<Link to='/'>Ecom Client</Link>
 			</h1>
+
+			{/* Search component */}
+			<Search />
 
 			{/* Show either the authenticatedGroup or unauthenticatedGroup */}
 			{authenticated ? authenticatedGroup : unauthenticatedGroup}

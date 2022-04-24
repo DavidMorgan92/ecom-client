@@ -16,6 +16,7 @@ export const routes = {
 		// Return complete URL
 		return new URL(url, routes.base());
 	},
+	categories: () => new URL('/products/categories', routes.base()),
 };
 
 /**
@@ -26,10 +27,6 @@ export const routes = {
  * @throws Will throw if network response is not OK
  */
 export async function getProducts(category, name) {
-	// Encode search parameters
-	category = encodeURIComponent(category);
-	name = encodeURIComponent(name);
-
 	// Send products request to API endpoint
 	const response = await fetch(routes.get(category, name));
 
@@ -43,4 +40,24 @@ export async function getProducts(category, name) {
 
 	// Return product info
 	return products;
+}
+
+/**
+ * Get a list of product categories
+ * @returns List of product categories sorted alphabetically
+ */
+export async function getCategories() {
+	// Send categories request to API endpoint
+	const response = await fetch(routes.categories());
+
+	// Throw if response is not OK
+	if (!response.ok) {
+		throw new Error(`GET ${routes.categories()} response not OK`);
+	}
+
+	// Get categories returned by API
+	const categories = await response.json();
+
+	// Return categories
+	return categories;
 }

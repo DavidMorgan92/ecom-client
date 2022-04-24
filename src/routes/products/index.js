@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	getProducts,
-	selectGetFailed,
-	selectGetPending,
+	selectGetProductsFailed,
+	selectGetProductsPending,
 	selectProducts,
 } from '../../store/productsSlice';
 import ProductList from '../../components/productList';
@@ -19,8 +19,8 @@ export default function Products() {
 
 	// Get information about products received from the API
 	const products = useSelector(selectProducts);
-	const getPending = useSelector(selectGetPending);
-	const getFailed = useSelector(selectGetFailed);
+	const getPending = useSelector(selectGetProductsPending);
+	const getFailed = useSelector(selectGetProductsFailed);
 
 	// Get products on mount
 	useEffect(() => {
