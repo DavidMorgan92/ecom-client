@@ -9,11 +9,22 @@ import { setupServer } from 'msw/node';
 import Products from '.';
 import store from '../../store';
 import { routes } from '../../services/ecom/products';
+import { formatPrice } from '../../util';
 
 // Mock backing store
 const products = [
-	{ id: 1, name: 'Toothbrush' },
-	{ id: 2, name: 'Hairbrush' },
+	{
+		id: 1,
+		name: 'Toothbrush',
+		description: 'Bristly',
+		pricePennies: '123',
+	},
+	{
+		id: 2,
+		name: 'Hairbrush',
+		description: 'For your head',
+		pricePennies: '234',
+	},
 ];
 
 // Mock server
@@ -45,8 +56,16 @@ describe('Products page', () => {
 			screen.queryByText('Receiving products list...'),
 		);
 
-		// Expect product names to be displayed
+		// Expect product information to be displayed
 		expect(screen.getByText(products[0].name)).toBeInTheDocument();
+		expect(screen.getByText(products[0].description)).toBeInTheDocument();
+		expect(
+			screen.getByText(formatPrice(products[0].pricePennies)),
+		).toBeInTheDocument();
 		expect(screen.getByText(products[1].name)).toBeInTheDocument();
+		expect(screen.getByText(products[1].description)).toBeInTheDocument();
+		expect(
+			screen.getByText(formatPrice(products[1].pricePennies)),
+		).toBeInTheDocument();
 	});
 });
