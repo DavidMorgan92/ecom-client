@@ -22,6 +22,12 @@ const initialState = {
 
 	/** The list of product categories received from the API */
 	categories: [],
+
+	/** Is a get product by ID request pending? */
+	getProductByIdPending: false,
+
+	/** Did the last get product by ID request fail? */
+	getProductByIdFailed: false,
 };
 
 /**
@@ -52,6 +58,22 @@ export const getCategories = createAsyncThunk(
 		// Return the categories as the action payload
 		return {
 			categories,
+		};
+	},
+);
+
+/**
+ * Dispatch this thunk to get a product by its ID
+ */
+export const getProductById = createAsyncThunk(
+	'products/getProductById',
+	async ({ id }) => {
+		// Request product through ECOM products service
+		const product = await products.getProductById(id);
+
+		// Return the product as the action payload
+		return {
+			product,
 		};
 	},
 );
@@ -97,6 +119,38 @@ const productsSlice = createSlice({
 			state.getCategoriesFailed = false;
 			state.categories = action.payload.categories;
 		},
+
+		/** A request for a single product is pending */
+		[getProductById.pending]: state => {
+			state.getProductByIdPending = true;
+			state.getProductByIdFailed = false;
+		},
+
+		/** A request for a single product failed */
+		[getProductById.rejected]: state => {
+			state.getProductByIdPending = false;
+			state.getProductByIdFailed = true;
+		},
+
+		/** A request for a single product succeeded */
+		[getProductById.fulfilled]: (state, action) => {
+			state.getProductByIdPending = false;
+			state.getProductByIdFailed = false;
+
+			// Get the index in the set of downloaded products that matches the newly downloaded product
+			const existingIndex = state.products.findIndex(
+				p => p.id === action.payload.product.id,
+			);
+
+			// If an index of an existing product is found
+			if (existingIndex >= 0) {
+				// Update that existing item with the new information
+				state.products[existingIndex] = action.payload.product;
+			} else {
+				// Add the new information to the downloaded set
+				state.products.push(action.payload.product);
+			}
+		},
 	},
 });
 
@@ -121,5 +175,13 @@ export const selectGetCategoriesFailed = state =>
 
 /** Select categories */
 export const selectCategories = state => state.products.categories;
+
+/** Select get product by ID request pending state */
+export const selectGetProductByIdPending = state =>
+	state.products.getProductByIdPending;
+
+/** Select get product by ID request failed state */
+export const selectGetProductByIdFailed = state =>
+	state.products.getProductByIdFailed;
 
 export default productsSlice.reducer;

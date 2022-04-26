@@ -17,6 +17,7 @@ export const routes = {
 		return new URL(url, routes.base());
 	},
 	categories: () => new URL('/products/categories', routes.base()),
+	getOne: id => new URL(`/products/${id}`, routes.base()),
 };
 
 /**
@@ -45,6 +46,7 @@ export async function getProducts(category, name) {
 /**
  * Get a list of product categories
  * @returns List of product categories sorted alphabetically
+ * @throws Will throw if network response is not OK
  */
 export async function getCategories() {
 	// Send categories request to API endpoint
@@ -60,4 +62,26 @@ export async function getCategories() {
 
 	// Return categories
 	return categories;
+}
+
+/**
+ * Get a product by its ID
+ * @param {number} id ID of the product to get from the API
+ * @returns The product information
+ * @throws Will throw if network response is not OK
+ */
+export async function getProductById(id) {
+	// Get product from API endpoint
+	const response = await fetch(routes.getOne(id));
+
+	// Throw if response is not OK
+	if (!response.ok) {
+		throw new Error(`GET ${routes.getOne(id)} response not OK`);
+	}
+
+	// Get product returned by API
+	const product = await response.json();
+
+	// Return product
+	return product;
 }

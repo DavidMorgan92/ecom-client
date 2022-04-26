@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './store';
+import Header from './components/header';
 import Home from './routes/home';
 import Login from './routes/login';
 import Register from './routes/register';
 import Account from './routes/account';
 import Products from './routes/products';
-import Header from './components/header';
+import ProductDetails from './routes/productDetails';
+import NoMatch from './routes/noMatch';
 
 function App() {
 	return (
@@ -21,6 +23,8 @@ function App() {
 							<Route path='register' element={<Register />} />
 							<Route path='account' element={<Account />} />
 							<Route path='products' element={<Products />} />
+							<Route path='product/:productId' element={<ProductDetails />} />
+							<Route path='*' element={<NoMatch />} />
 						</Route>
 					</Routes>
 				</main>
