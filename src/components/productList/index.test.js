@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import ProductList from '.';
 import { formatPrice } from '../../util';
 
@@ -21,7 +22,7 @@ describe('ProductList component', () => {
 		];
 
 		// Render component
-		render(<ProductList products={products} />);
+		render(<ProductList products={products} />, { wrapper: MemoryRouter });
 
 		// Expect product information to be displayed
 		expect(screen.getByText(products[0].name)).toBeInTheDocument();

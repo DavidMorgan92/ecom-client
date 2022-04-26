@@ -10,6 +10,7 @@ import Products from '.';
 import store from '../../store';
 import { routes } from '../../services/ecom/products';
 import { formatPrice } from '../../util';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock backing store
 const products = [
@@ -46,6 +47,7 @@ describe('Products page', () => {
 			<Provider store={store}>
 				<Products />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for get pending message to be shown
