@@ -89,7 +89,7 @@ export default function AddressForm({ address, onSubmit, onCancel, disabled }) {
 					<input type='submit' value='Submit' disabled={disabled} />
 
 					{/* Cancel button */}
-					<button onClick={onCancel} disabled={disabled}>
+					<button type='button' onClick={onCancel} disabled={disabled}>
 						Cancel
 					</button>
 				</Form>
