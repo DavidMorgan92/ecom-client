@@ -59,12 +59,13 @@ describe('AddressForm component', () => {
 		expect(screen.getByText('Cancel')).toBeDisabled();
 	});
 
-	it('calls onSubmit prop when submit is clicked', () => {
-		// Mock submit function
+	it('calls onSubmit prop when submit is clicked', async () => {
+		// Mock handlers
 		const handleSubmit = jest.fn();
+		const handleCancel = jest.fn();
 
 		// Render component
-		render(<AddressForm onSubmit={handleSubmit} />);
+		render(<AddressForm onSubmit={handleSubmit} onCancel={handleCancel} />);
 
 		// Input values into the form
 		fireEvent.change(screen.getByLabelText('House name/number'), {
@@ -84,7 +85,7 @@ describe('AddressForm component', () => {
 		fireEvent.click(screen.getByDisplayValue('Submit'));
 
 		// Wait for submit event to complete
-		waitFor(() => {
+		await waitFor(() => {
 			// Expect handleSubmit to have been called once
 			expect(handleSubmit).toHaveBeenCalledTimes(1);
 
@@ -95,20 +96,24 @@ describe('AddressForm component', () => {
 				townCityName: 'Ebbw Vale',
 				postCode: 'NP23 6LP',
 			});
+
+			expect(handleCancel).not.toHaveBeenCalled();
 		});
 	});
 
 	it('calls onCancel prop when cancel is clicked', () => {
-		// Mock cancel function
+		// Mock handlers
 		const handleCancel = jest.fn();
+		const handleSubmit = jest.fn();
 
 		// Render component
-		render(<AddressForm onCancel={handleCancel} />);
+		render(<AddressForm onSubmit={handleSubmit} onCancel={handleCancel} />);
 
 		// Click the cancel button
 		fireEvent.click(screen.getByText('Cancel'));
 
 		// Expect handleCancel to have been called once
 		expect(handleCancel).toHaveBeenCalledTimes(1);
+		expect(handleSubmit).not.toHaveBeenCalled();
 	});
 });

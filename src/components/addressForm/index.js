@@ -41,10 +41,14 @@ export default function AddressForm({ address, onSubmit, onCancel, disabled }) {
 		Object.assign(initialValues, address);
 	}
 
+	function handleSubmit(values) {
+		onSubmit(values);
+	}
+
 	return (
 		<Formik
 			initialValues={initialValues}
-			onSubmit={onSubmit}
+			onSubmit={handleSubmit}
 			validationSchema={addressSchema}
 		>
 			{({ errors, touched }) => (
