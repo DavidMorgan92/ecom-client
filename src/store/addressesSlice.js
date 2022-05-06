@@ -19,6 +19,18 @@ const initialState = {
 
 	/** Did the last create address request fail? */
 	createAddressFailed: false,
+
+	/** Is an edit address request pending? */
+	editAddressPending: false,
+
+	/** Did the last edit address request fail? */
+	editAddressFailed: false,
+
+	/** Is a delete address request pending? */
+	deleteAddressPending: false,
+
+	/** Did the last delete address request fail? */
+	deleteAddressFailed: false,
 };
 
 /**
@@ -52,6 +64,38 @@ export const createAddress = createAsyncThunk(
 		return {
 			address,
 		};
+	},
+);
+
+/**
+ * Dispatch this thunk to update an address belonging to the authenticated user
+ */
+export const editAddress = createAsyncThunk(
+	'addresses/edit',
+	async ({ id, houseNameNumber, streetName, townCityName, postCode }) => {
+		// Update an address through the ECOM addresses service
+		const address = await addresses.updateAddress(
+			id,
+			houseNameNumber,
+			streetName,
+			townCityName,
+			postCode,
+		);
+
+		// Return the updated address as the action payload
+		return {
+			address,
+		};
+	},
+);
+
+/**
+ * Dispatch this thunk to delete an address belonging to the authenticated user
+ */
+export const deleteAddress = createAsyncThunk(
+	'addresses/delete',
+	async ({ id }) => {
+		await addresses.deleteAddress(id);
 	},
 );
 
@@ -96,6 +140,56 @@ const addressesSlice = createSlice({
 			state.createAddressFailed = false;
 			state.addresses.push(action.payload.address);
 		},
+
+		/** The edit address request is pending a response */
+		[editAddress.pending]: state => {
+			state.editAddressPending = true;
+			state.editAddressFailed = false;
+		},
+
+		/** The edit address request failed */
+		[editAddress.rejected]: state => {
+			state.editAddressPending = false;
+			state.editAddressFailed = true;
+		},
+
+		/** The edit address request succeeded */
+		[editAddress.fulfilled]: (state, action) => {
+			state.editAddressPending = false;
+			state.editAddressFailed = false;
+
+			// See if there is an existing address with this ID in the addresses list
+			const existingIndex = state.addresses.findIndex(
+				existingAddress => existingAddress.id === action.payload.address.id,
+			);
+
+			// If an index of an existing address is found
+			if (existingIndex >= 0) {
+				// Update the existing address in the addresses list
+				state.addresses[existingIndex] = action.payload.address;
+			} else {
+				// Add the updated address to the addresses list
+				state.addresses.push(action.payload.address);
+			}
+		},
+
+		/** The delete address request is pending a response */
+		[deleteAddress.pending]: state => {
+			state.deleteAddressPending = true;
+			state.deleteAddressFailed = false;
+		},
+
+		/** The delete address request failed */
+		[deleteAddress.rejected]: state => {
+			state.deleteAddressPending = false;
+			state.deleteAddressFailed = true;
+		},
+
+		/** The delete address request succeeded */
+		[deleteAddress.fulfilled]: state => {
+			state.deleteAddressPending = false;
+			state.deleteAddressFailed = false;
+		},
 	},
 });
 
@@ -117,5 +211,21 @@ export const selectCreateAddressPending = state =>
 /** Select create address failed state */
 export const selectCreateAddressFailed = state =>
 	state.addresses.createAddressFailed;
+
+/** Select edit address pending state */
+export const selectEditAddressPending = state =>
+	state.addresses.editAddressPending;
+
+/** Select edit address failed state */
+export const selectEditAddressFailed = state =>
+	state.addresses.editAddressFailed;
+
+/** Select delete address pending state */
+export const selectDeleteAddressPending = state =>
+	state.addresses.deleteAddressPending;
+
+/** Select delete address failed state */
+export const selectDeleteAddressFailed = state =>
+	state.addresses.deleteAddressFailed;
 
 export default addressesSlice.reducer;

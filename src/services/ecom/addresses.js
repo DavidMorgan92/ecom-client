@@ -69,3 +69,63 @@ export async function createAddress(
 	// Return address
 	return address;
 }
+
+/**
+ * Update an address belonging to the authenticated user
+ * @param {number} id ID of the address to update
+ * @param {string} houseNameNumber House name/number
+ * @param {string} streetName Street name
+ * @param {string} townCityName Town/City name
+ * @param {string} postCode Post code
+ * @returns Address object
+ * @throws Will throw if network response is not OK
+ */
+export async function updateAddress(
+	id,
+	houseNameNumber,
+	streetName,
+	townCityName,
+	postCode,
+) {
+	// Send put request to API endpoint
+	const response = await fetch(routes.addressById(id), {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({
+			houseNameNumber,
+			streetName,
+			townCityName,
+			postCode,
+		}),
+	});
+
+	// Throw if response is not OK
+	if (!response.ok) {
+		throw new Error(`POST ${routes.addresses()} response not OK`);
+	}
+
+	// Get address returned by API
+	const address = await response.json();
+
+	// Return address
+	return address;
+}
+
+/**
+ * Delete an address belonging to the authenticated user
+ * @param {number} id ID of the address to delete
+ * @throws Will throw if network response is not OK
+ */
+export async function deleteAddress(id) {
+	// Send delete request to API endpoint
+	const response = await fetch(routes.addressById(id), {
+		method: 'DELETE',
+		credentials: 'include'
+	});
+
+	// Throw if response is not OK
+	if (!response.ok) {
+		throw new Error(`POST ${routes.addresses()} response not OK`);
+	}
+}
