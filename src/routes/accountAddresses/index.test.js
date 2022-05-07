@@ -81,6 +81,21 @@ const server = setupServer(
 
 		return res(ctx.json(address));
 	}),
+
+	rest.put(routes.addressById(1).href, (req, res, ctx) => {
+		const address = {
+			id: 1,
+			houseNameNumber: req.body.houseNameNumber,
+			streetName: req.body.streetName,
+			townCityName: req.body.townCityName,
+			postCode: req.body.postCode,
+		};
+
+		const index = addresses.findIndex(a => a.id === 1);
+		addresses[index] = address;
+
+		return res(ctx.json(address));
+	}),
 );
 
 // Employ mock server
@@ -311,16 +326,16 @@ describe('AccountAddresses page', () => {
 
 		// Input values into the form
 		fireEvent.change(screen.getByLabelText('House name/number'), {
-			target: { value: 'Pendennis' },
+			target: { value: '732' },
 		});
 		fireEvent.change(screen.getByLabelText('Street name'), {
-			target: { value: 'Tredegar Road' },
+			target: { value: 'Evergreen Terrace' },
 		});
 		fireEvent.change(screen.getByLabelText('Town/city name'), {
-			target: { value: 'Ebbw Vale' },
+			target: { value: 'Springfield' },
 		});
 		fireEvent.change(screen.getByLabelText('Post code'), {
-			target: { value: 'NP23 6LP' },
+			target: { value: 'SP23 1ET' },
 		});
 
 		// Click the submit button
@@ -332,10 +347,10 @@ describe('AccountAddresses page', () => {
 		// Expect the createAddress thunk to have been called with the given parameters
 		expect(createAddressSpy).toHaveBeenCalledTimes(1);
 		expect(createAddressSpy).toHaveBeenCalledWith({
-			houseNameNumber: 'Pendennis',
-			streetName: 'Tredegar Road',
-			townCityName: 'Ebbw Vale',
-			postCode: 'NP23 6LP',
+			houseNameNumber: '732',
+			streetName: 'Evergreen Terrace',
+			townCityName: 'Springfield',
+			postCode: 'SP23 1ET',
 		});
 
 		// Wait for the creating address message to disappear
@@ -431,7 +446,80 @@ describe('AccountAddresses page', () => {
 		expect(screen.queryByText('Create New Address')).toBeInTheDocument();
 	});
 
+	it('hides create address form when cancel button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the create button
+		fireEvent.click(screen.getByText('Create New Address'));
+
+		// Expect the create address form to be shown
+		expect(screen.getByTestId('create-address-form')).toBeInTheDocument();
+
+		// Expect the create address button not to be shown
+		expect(screen.queryByText('Create New Address')).not.toBeInTheDocument();
+
+		// Click the cancel button
+		fireEvent.click(screen.getByText('Cancel'));
+
+		// Expect the create address from not to be shown
+		expect(screen.queryByTestId('create-address-form')).not.toBeInTheDocument();
+
+		// Expect the create address button to be shown
+		expect(screen.queryByText('Create New Address')).toBeInTheDocument();
+	});
+
 	it('shows edit address form when edit button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Get info on edit and delete buttons
+		const editButtons = screen.getAllByText('Edit');
+		const numEditButtons = editButtons.length;
+		const deleteButtons = screen.getAllByText('Delete');
+		const numDeleteButtons = deleteButtons.length;
+
+		// Click the first edit button
+		fireEvent.click(editButtons[0]);
+
+		// Expect edit address form to be shown
+		expect(screen.getByTestId('edit-address-form')).toBeInTheDocument();
+
+		// Expect the first address's details not to be shown
+		expect(
+			screen.queryByText(addresses[0].houseNameNumber),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(addresses[0].streetName)).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(addresses[0].townCityName),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(addresses[0].postCode)).not.toBeInTheDocument();
+
+		// Expect number of edit and delete buttons to be reduced by one
+		expect(screen.getAllByText('Edit').length).toEqual(numEditButtons - 1);
+		expect(screen.getAllByText('Delete').length).toEqual(numDeleteButtons - 1);
+	});
+
+	it('dispatches editAddress thunk when edit address form is submitted', async () => {
+		// Spy on editAddress thunk in addressesSlice
+		const editAddressSpy = jest.spyOn(addressesSlice, 'editAddress');
+
 		// Render component
 		render(
 			<Provider store={mockStore}>
@@ -446,8 +534,143 @@ describe('AccountAddresses page', () => {
 		// Click the first edit button
 		fireEvent.click(screen.getAllByText('Edit')[0]);
 
-		// Expect edit address form to be shown
+		// Input values into the form
+		fireEvent.change(screen.getByLabelText('House name/number'), {
+			target: { value: '732' },
+		});
+		fireEvent.change(screen.getByLabelText('Street name'), {
+			target: { value: 'Evergreen Terrace' },
+		});
+		fireEvent.change(screen.getByLabelText('Town/city name'), {
+			target: { value: 'Springfield' },
+		});
+		fireEvent.change(screen.getByLabelText('Post code'), {
+			target: { value: 'SP23 1ET' },
+		});
+
+		// Click the submit button
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect updating address message to be shown
+		expect(await screen.findByText('Updating address...')).toBeInTheDocument();
+
+		// Expect editAddress thunk to have been called with the given parameters
+		expect(editAddressSpy).toHaveBeenCalledTimes(1);
+		expect(editAddressSpy).toHaveBeenCalledWith({
+			id: addresses[0].id,
+			houseNameNumber: '732',
+			streetName: 'Evergreen Terrace',
+			townCityName: 'Springfield',
+			postCode: 'SP23 1ET',
+		});
+
+		// Wait for the updating address message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Updating address...'));
+
+		// Expect the edit address form not to be in the document
+		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
+
+		// Restore editAddress implementation
+		editAddressSpy.mockRestore();
+	});
+
+	it('handles failure to edit an address', async () => {
+		// Make server fail with 500
+		server.use(
+			rest.put(routes.addressById(1).href, (req, res, ctx) => {
+				return res(ctx.status(500));
+			}),
+		);
+
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first edit button
+		fireEvent.click(screen.getAllByText('Edit')[0]);
+
+		// Input values into the form
+		fireEvent.change(screen.getByLabelText('House name/number'), {
+			target: { value: '732' },
+		});
+		fireEvent.change(screen.getByLabelText('Street name'), {
+			target: { value: 'Evergreen Terrace' },
+		});
+		fireEvent.change(screen.getByLabelText('Town/city name'), {
+			target: { value: 'Springfield' },
+		});
+		fireEvent.change(screen.getByLabelText('Post code'), {
+			target: { value: 'SP23 1ET' },
+		});
+
+		// Click the submit button
+		fireEvent.click(screen.getByDisplayValue('Submit'));
+
+		// Expect updating address message to be shown
+		expect(await screen.findByText('Updating address...')).toBeInTheDocument();
+
+		// Wait for the updating address message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Updating address...'));
+
+		// Expect failed to update message to be shown
+		expect(screen.getByText('Failed to update address')).toBeInTheDocument();
+	});
+
+	it('hides edit address form when create button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first edit button
+		fireEvent.click(screen.getAllByText('Edit')[0]);
+
+		// Expect the edit address form to be shown
 		expect(screen.getByTestId('edit-address-form')).toBeInTheDocument();
+
+		// Click the create button
+		fireEvent.click(screen.getByText('Create New Address'));
+
+		// Expect the edit address from not to be shown
+		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
+	});
+
+	it('hides edit address form when cancel button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first edit button
+		fireEvent.click(screen.getAllByText('Edit')[0]);
+
+		// Expect the edit address form to be shown
+		expect(screen.getByTestId('edit-address-form')).toBeInTheDocument();
+
+		// Click the create button
+		fireEvent.click(screen.getByText('Cancel'));
+
+		// Expect the edit address from not to be shown
+		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
 	});
 
 	it("navigates to login page when user isn't authenticated", () => {

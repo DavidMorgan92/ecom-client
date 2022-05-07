@@ -4,10 +4,13 @@ import { Navigate } from 'react-router-dom';
 import AddressForm from '../../components/addressForm';
 import {
 	createAddress,
+	editAddress,
 	getAddresses,
 	selectAddresses,
 	selectCreateAddressFailed,
 	selectCreateAddressPending,
+	selectEditAddressFailed,
+	selectEditAddressPending,
 	selectGetAddressesFailed,
 	selectGetAddressesPending,
 } from '../../store/addressesSlice';
@@ -25,6 +28,8 @@ export default function AccountAddresses() {
 	const getFailed = useSelector(selectGetAddressesFailed);
 	const createPending = useSelector(selectCreateAddressPending);
 	const createFailed = useSelector(selectCreateAddressFailed);
+	const editPending = useSelector(selectEditAddressPending);
+	const editFailed = useSelector(selectEditAddressFailed);
 	const addresses = useSelector(selectAddresses);
 
 	// Get information about auth state from auth redux store
@@ -91,7 +96,18 @@ export default function AccountAddresses() {
 	}
 
 	// User submitted the edit address form
-	function handleEditSubmit(values) {}
+	function handleEditSubmit(values) {
+		dispatch(editAddress(values))
+			.unwrap()
+			.then(() => {
+				// Stop editing if edit is successful
+				setEditingId(-1);
+			})
+			.catch(() => {
+				// Don't stop editing if edit is unsuccessful
+				// Allow failed to edit message to be shown
+			});
+	}
 
 	// User cancelled the edit address form
 	function handleEditCancel() {
@@ -127,6 +143,12 @@ export default function AccountAddresses() {
 									onSubmit={handleEditSubmit}
 									onCancel={handleEditCancel}
 								/>
+
+								{/* Show when edit is pending */}
+								{editPending && <p>Updating address...</p>}
+
+								{/* Show when edit has failed */}
+								{editFailed && <p>Failed to update address</p>}
 							</div>
 						);
 					}
