@@ -2,8 +2,9 @@ import {
 	fireEvent,
 	render,
 	screen,
-	waitFor,
 	waitForElementToBeRemoved,
+	queryByText,
+	getByText,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Router } from 'react-router-dom';
@@ -95,6 +96,12 @@ const server = setupServer(
 		addresses[index] = address;
 
 		return res(ctx.json(address));
+	}),
+
+	rest.delete(routes.addressById(1).href, (req, res, ctx) => {
+		const index = addresses.findIndex(a => a.id === 1);
+		addresses.splice(index, 1);
+		return res(ctx.status(204));
 	}),
 );
 
@@ -446,6 +453,37 @@ describe('AccountAddresses page', () => {
 		expect(screen.queryByText('Create New Address')).toBeInTheDocument();
 	});
 
+	it('hides create address form when delete button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the create button
+		fireEvent.click(screen.getByText('Create New Address'));
+
+		// Expect the create address form to be shown
+		expect(screen.getByTestId('create-address-form')).toBeInTheDocument();
+
+		// Expect the create address button not to be shown
+		expect(screen.queryByText('Create New Address')).not.toBeInTheDocument();
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Expect the create address from not to be shown
+		expect(screen.queryByTestId('create-address-form')).not.toBeInTheDocument();
+
+		// Expect the create address button to be shown
+		expect(screen.queryByText('Create New Address')).toBeInTheDocument();
+	});
+
 	it('hides create address form when cancel button is clicked', async () => {
 		// Render component
 		render(
@@ -468,7 +506,9 @@ describe('AccountAddresses page', () => {
 		expect(screen.queryByText('Create New Address')).not.toBeInTheDocument();
 
 		// Click the cancel button
-		fireEvent.click(screen.getByText('Cancel'));
+		fireEvent.click(
+			getByText(screen.getByTestId('create-address-form'), 'Cancel'),
+		);
 
 		// Expect the create address from not to be shown
 		expect(screen.queryByTestId('create-address-form')).not.toBeInTheDocument();
@@ -648,6 +688,31 @@ describe('AccountAddresses page', () => {
 		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
 	});
 
+	it('hides edit address form when delete button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first edit button
+		fireEvent.click(screen.getAllByText('Edit')[0]);
+
+		// Expect the edit address form to be shown
+		expect(screen.getByTestId('edit-address-form')).toBeInTheDocument();
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Expect the edit address from not to be shown
+		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
+	});
+
 	it('hides edit address form when cancel button is clicked', async () => {
 		// Render component
 		render(
@@ -666,11 +731,172 @@ describe('AccountAddresses page', () => {
 		// Expect the edit address form to be shown
 		expect(screen.getByTestId('edit-address-form')).toBeInTheDocument();
 
-		// Click the create button
-		fireEvent.click(screen.getByText('Cancel'));
+		// Click the cancel button
+		fireEvent.click(
+			getByText(screen.getByTestId('edit-address-form'), 'Cancel'),
+		);
 
 		// Expect the edit address from not to be shown
 		expect(screen.queryByTestId('edit-address-form')).not.toBeInTheDocument();
+	});
+
+	it('shows delete address dialog when delete button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Expect the delete address dialog to be shown
+		const deleteAddressDialog = screen.getByTestId('delete-address-dialog');
+		expect(deleteAddressDialog).toBeInTheDocument();
+
+		// Expect the address's details to be shown in the dialog
+		expect(
+			queryByText(deleteAddressDialog, addresses[0].houseNameNumber),
+		).toBeInTheDocument();
+		expect(
+			queryByText(deleteAddressDialog, addresses[0].streetName),
+		).toBeInTheDocument();
+		expect(
+			queryByText(deleteAddressDialog, addresses[0].townCityName),
+		).toBeInTheDocument();
+		expect(
+			queryByText(deleteAddressDialog, addresses[0].postCode),
+		).toBeInTheDocument();
+
+		// Expect the delete address dialog to contain confirm and cancel buttons
+		expect(queryByText(deleteAddressDialog, 'Confirm')).toBeInTheDocument();
+		expect(queryByText(deleteAddressDialog, 'Cancel')).toBeInTheDocument();
+	});
+
+	it('dispatches deleteAddress thunk when confirm button is clicked', async () => {
+		// Spy on deleteAddress thunk in addressesSlice
+		const deleteAddressSpy = jest.spyOn(addressesSlice, 'deleteAddress');
+
+		// Store ID of address we will be deleting
+		const idToDelete = addresses[0].id;
+
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Click the confirm button
+		fireEvent.click(screen.getByText('Confirm'));
+
+		// Expect deleting address message to be shown
+		expect(await screen.findByText('Deleting address...')).toBeInTheDocument();
+
+		// Expect deleteAddress thunk to have been called with the given parameters
+		expect(deleteAddressSpy).toHaveBeenCalledTimes(1);
+		expect(deleteAddressSpy).toHaveBeenCalledWith(idToDelete);
+
+		// Wait for the deleting address message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Deleting address...'));
+
+		// Expect the delete address dialog not to be in the document
+		expect(
+			screen.queryByTestId('delete-address-dialog'),
+		).not.toBeInTheDocument();
+
+		// Restore deleteAddress implementation
+		deleteAddressSpy.mockRestore();
+	});
+
+	it('hides delete address dialog when create button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Expect the delete address form to be shown
+		expect(screen.getByTestId('delete-address-dialog')).toBeInTheDocument();
+
+		// Click the create button
+		fireEvent.click(screen.getByText('Create New Address'));
+
+		// Expect the delete address from not to be shown
+		expect(
+			screen.queryByTestId('delete-address-dialog'),
+		).not.toBeInTheDocument();
+	});
+
+	it('hides delete address dialog when edit button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Expect the delete address form to be shown
+		expect(screen.getByTestId('delete-address-dialog')).toBeInTheDocument();
+
+		// Click the first edit button
+		fireEvent.click(screen.getAllByText('Edit')[0]);
+
+		// Expect the delete address from not to be shown
+		expect(
+			screen.queryByTestId('delete-address-dialog'),
+		).not.toBeInTheDocument();
+	});
+
+	it('hides delete address dialog when cancel button is clicked', async () => {
+		// Render component
+		render(
+			<Provider store={mockStore}>
+				<AccountAddresses />
+			</Provider>,
+			{ wrapper: MemoryRouter },
+		);
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.queryByText('Loading addresses...'));
+
+		// Click the first delete button
+		fireEvent.click(screen.getAllByText('Delete')[0]);
+
+		// Click the cancel button
+		fireEvent.click(screen.getByText('Cancel'));
+
+		// Expect the delete address dialog not to be in the document
+		expect(
+			screen.queryByTestId('delete-address-dialog'),
+		).not.toBeInTheDocument();
 	});
 
 	it("navigates to login page when user isn't authenticated", () => {

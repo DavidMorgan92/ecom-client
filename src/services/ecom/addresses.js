@@ -102,7 +102,7 @@ export async function updateAddress(
 
 	// Throw if response is not OK
 	if (!response.ok) {
-		throw new Error(`POST ${routes.addresses()} response not OK`);
+		throw new Error(`PUT ${routes.addresses()} response not OK`);
 	}
 
 	// Get address returned by API
@@ -121,11 +121,11 @@ export async function deleteAddress(id) {
 	// Send delete request to API endpoint
 	const response = await fetch(routes.addressById(id), {
 		method: 'DELETE',
-		credentials: 'include'
+		credentials: 'include',
 	});
 
 	// Throw if response is not OK
 	if (!response.ok) {
-		throw new Error(`POST ${routes.addresses()} response not OK`);
+		throw new Error(`DELETE ${routes.addresses()} response not OK`);
 	}
 }

@@ -92,12 +92,13 @@ export const editAddress = createAsyncThunk(
 /**
  * Dispatch this thunk to delete an address belonging to the authenticated user
  */
-export const deleteAddress = createAsyncThunk(
-	'addresses/delete',
-	async ({ id }) => {
-		await addresses.deleteAddress(id);
-	},
-);
+export const deleteAddress = createAsyncThunk('addresses/delete', async id => {
+	await addresses.deleteAddress(id);
+
+	return {
+		id,
+	};
+});
 
 const addressesSlice = createSlice({
 	name: 'addresses',
@@ -186,9 +187,18 @@ const addressesSlice = createSlice({
 		},
 
 		/** The delete address request succeeded */
-		[deleteAddress.fulfilled]: state => {
+		[deleteAddress.fulfilled]: (state, action) => {
 			state.deleteAddressPending = false;
 			state.deleteAddressFailed = false;
+
+			// Remove the address from the redux store
+			const index = state.addresses.findIndex(
+				address => address.id === action.payload.id,
+			);
+
+			if (index >= 0) {
+				state.addresses.splice(index, 1);
+			}
 		},
 	},
 });

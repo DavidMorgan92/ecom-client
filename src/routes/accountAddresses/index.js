@@ -4,11 +4,14 @@ import { Navigate } from 'react-router-dom';
 import AddressForm from '../../components/addressForm';
 import {
 	createAddress,
+	deleteAddress,
 	editAddress,
 	getAddresses,
 	selectAddresses,
 	selectCreateAddressFailed,
 	selectCreateAddressPending,
+	selectDeleteAddressFailed,
+	selectDeleteAddressPending,
 	selectEditAddressFailed,
 	selectEditAddressPending,
 	selectGetAddressesFailed,
@@ -30,6 +33,8 @@ export default function AccountAddresses() {
 	const createFailed = useSelector(selectCreateAddressFailed);
 	const editPending = useSelector(selectEditAddressPending);
 	const editFailed = useSelector(selectEditAddressFailed);
+	const deletePending = useSelector(selectDeleteAddressPending);
+	const deleteFailed = useSelector(selectDeleteAddressFailed);
 	const addresses = useSelector(selectAddresses);
 
 	// Get information about auth state from auth redux store
@@ -40,6 +45,9 @@ export default function AccountAddresses() {
 
 	// What address ID is the user editing? (-1 if none)
 	const [editingId, setEditingId] = useState(-1);
+
+	// What address is the user trying to delete?
+	const [deletingAddress, setDeletingAddress] = useState(null);
 
 	// Get addresses on mount
 	useEffect(() => {
@@ -63,6 +71,9 @@ export default function AccountAddresses() {
 
 		// Stop editing
 		setEditingId(-1);
+
+		// Stop deleting
+		setDeletingAddress(null);
 	}
 
 	// User submitted the new address form
@@ -93,6 +104,9 @@ export default function AccountAddresses() {
 
 		// Start editing this address
 		setEditingId(addressId);
+
+		// Stop deleting
+		setDeletingAddress(null);
 	}
 
 	// User submitted the edit address form
@@ -116,7 +130,36 @@ export default function AccountAddresses() {
 	}
 
 	// User clicked the delete button
-	function handleDeleteClick(addressId) {}
+	function handleDeleteClick(address) {
+		// Stop creating
+		setCreating(false);
+
+		// Stop editing
+		setEditingId(-1);
+
+		// Start deleting this address
+		setDeletingAddress(address);
+	}
+
+	// User confirmed deletion
+	function handleDeleteSubmit() {
+		dispatch(deleteAddress(deletingAddress.id))
+			.unwrap()
+			.then(() => {
+				// Stop deleting if delete is successful
+				setDeletingAddress(null);
+			})
+			.catch(() => {
+				// Don't stop deleting if delete is unsuccessful
+				// Allow failed to delete message to be shown
+			});
+	}
+
+	// User cancelled deletion
+	function handleDeleteCancel() {
+		// Stop deleting
+		setDeletingAddress(null);
+	}
 
 	return (
 		<>
@@ -161,9 +204,7 @@ export default function AccountAddresses() {
 							<span>{address.townCityName}</span>
 							<span>{address.postCode}</span>
 							<button onClick={() => handleEditClick(address.id)}>Edit</button>
-							<button onClick={() => handleDeleteClick(address.id)}>
-								Delete
-							</button>
+							<button onClick={() => handleDeleteClick(address)}>Delete</button>
 						</div>
 					);
 				})}
@@ -187,6 +228,30 @@ export default function AccountAddresses() {
 				</div>
 			) : (
 				<button onClick={handleCreateClick}>Create New Address</button>
+			)}
+
+			{/* Show if user is deleting an address */}
+			{deletingAddress && (
+				<dialog open data-testid='delete-address-dialog'>
+					<p>Are you sure you want to delete this address?</p>
+
+					{/* Show when delete is pending */}
+					{deletePending && <p>Deleting address...</p>}
+
+					{/* Show when delete has failed */}
+					{deleteFailed && <p>Failed to delete address</p>}
+
+					<div>
+						<span>{deletingAddress.houseNameNumber}</span>
+						<span>{deletingAddress.streetName}</span>
+						<span>{deletingAddress.townCityName}</span>
+						<span>{deletingAddress.postCode}</span>
+					</div>
+					<div>
+						<button onClick={handleDeleteSubmit}>Confirm</button>
+						<button onClick={handleDeleteCancel}>Cancel</button>
+					</div>
+				</dialog>
 			)}
 		</>
 	);
