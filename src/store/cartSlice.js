@@ -86,7 +86,7 @@ const cartSlice = createSlice({
 		[getCart.fulfilled]: (state, action) => {
 			state.getCartPending = false;
 			state.getCartFailed = false;
-			state.cart = action.cart;
+			state.cart = action.payload.cart;
 		},
 
 		/** The update cart request is pending a response */

@@ -27,7 +27,7 @@ export async function getCart() {
 	const cart = await response.json();
 
 	// Return cart
-	return cart;
+	return cart.items;
 }
 
 /**
