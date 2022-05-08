@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as cart from '../services/ecom/cart';
+import { logout } from './authSlice';
 
 /**
  * Initial state of the cart slice
@@ -126,6 +127,12 @@ const cartSlice = createSlice({
 			state.checkoutCartFailed = false;
 
 			// Empty the cart
+			state.cart = [];
+		},
+
+		/** A logout request from the auth slice is pending */
+		[logout.pending]: state => {
+			// Empty the stored cart items
 			state.cart = [];
 		},
 	},

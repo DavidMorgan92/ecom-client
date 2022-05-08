@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as addresses from '../services/ecom/addresses';
+import { logout } from './authSlice';
 
 /**
  * Initial state of the addresses slice
@@ -199,6 +200,12 @@ const addressesSlice = createSlice({
 			if (index >= 0) {
 				state.addresses.splice(index, 1);
 			}
+		},
+
+		/** A logout request from the auth slice is pending */
+		[logout.pending]: state => {
+			// Empty the stored addresses
+			state.addresses = [];
 		},
 	},
 });
