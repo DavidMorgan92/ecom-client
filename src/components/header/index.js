@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	logout,
 	selectAuthenticated,
 	selectEmail,
 } from '../../store/authSlice';
+import { getCart, selectCart } from '../../store/cartSlice';
 import Search from '../search';
 
 /**
@@ -17,8 +19,18 @@ export default function Header() {
 	const authenticated = useSelector(selectAuthenticated);
 	const email = useSelector(selectEmail);
 
+	// Get information about the cart
+	const cart = useSelector(selectCart);
+
 	// Use dispatch to communicate with auth redux store
 	const dispatch = useDispatch();
+
+	// Get cart information if user is authenticated
+	useEffect(() => {
+		if (authenticated) {
+			dispatch(getCart());
+		}
+	}, [dispatch, authenticated]);
 
 	// Handle logout button click
 	function handleLogout() {
@@ -40,6 +52,9 @@ export default function Header() {
 	// Content to show when the user is authenticated
 	const authenticatedGroup = (
 		<>
+			{/* Cart link */}
+			<Link to='/cart' data-testid='cart-link'>Cart ({cart.length})</Link>
+
 			{/* Show the authenticated user's email */}
 			<Link to='/account' data-testid='account-link'>
 				{email}
