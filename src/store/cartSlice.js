@@ -46,7 +46,12 @@ export const getCart = createAsyncThunk('cart/get', async () => {
  */
 export const updateCart = createAsyncThunk('cart/update', async items => {
 	// Update the cart through the ECOM cart service
-	const cartInfo = await cart.updateCart(items);
+	const cartInfo = await cart.updateCart(
+		items.map(item => ({
+			count: item.count,
+			productId: item.product.id,
+		})),
+	);
 
 	// Return the updated cart as the action payload
 	return {
@@ -106,7 +111,7 @@ const cartSlice = createSlice({
 		[updateCart.fulfilled]: (state, action) => {
 			state.updateCartPending = false;
 			state.updateCartFailed = false;
-			state.cart = action.cart;
+			state.cart = action.payload.cart;
 		},
 
 		/** The checkout cart request is pending a response */

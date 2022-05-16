@@ -54,7 +54,7 @@ export async function updateCart(items) {
 	const cart = await response.json();
 
 	// Return updated cart
-	return cart;
+	return cart.items;
 }
 
 /**
