@@ -118,6 +118,8 @@ const cartSlice = createSlice({
 		[checkoutCart.pending]: state => {
 			state.checkoutCartPending = true;
 			state.checkoutCartFailed = false;
+			state.getCartFailed = false;
+			state.updateCartFailed = false;
 		},
 
 		/** The checkout cart request failed */
