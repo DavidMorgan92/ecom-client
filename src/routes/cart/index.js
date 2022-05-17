@@ -50,21 +50,38 @@ export default function Cart() {
 	}
 
 	// User changed the item count value
-	function handleCountChange(productId, count) {}
+	function handleCountChange(productId, count) {
+		// Get index of item with matching product ID
+		const index = cart.findIndex(item => item.product.id === productId);
+
+		// Update item count in cart
+		if (index >= 0) {
+			const newCart = [...cart];
+			newCart[index] = { count, product: cart[index].product };
+
+			// Update cart on server
+			dispatch(updateCart(newCart));
+		}
+	}
 
 	// User clicked the remove button
 	function handleRemove(productId) {
+		// Get index of item with matching product ID
 		const index = cart.findIndex(item => item.product.id === productId);
 
+		// Remove item from cart
 		if (index >= 0) {
-			cart.splice(index, 1);
-		}
+			const newCart = [...cart];
+			newCart.splice(index, 1);
 
-		dispatch(updateCart(cart));
+			// Update cart on server
+			dispatch(updateCart(newCart));
+		}
 	}
 
 	// User clicked the checkout button
 	function handleCheckout() {
+		// Dispatch checkout thunk
 		dispatch(checkoutCart());
 	}
 
@@ -86,21 +103,26 @@ export default function Cart() {
 			{updateFailed && <p>Failed to update</p>}
 
 			{/* List of cart items */}
-			{cart.map(item => (
-				<div key={item.product.id}>
-					<span>{item.product.name}</span>
-					<input
-						type='number'
-						min='1'
-						max='999'
-						value={item.count}
-						onChange={event =>
-							handleCountChange(item.product.id, event.target.value)
-						}
-					/>
-					<button onClick={() => handleRemove(item.product.id)}>Remove</button>
-				</div>
-			))}
+			<div data-testid='cart-list'>
+				{cart.map(item => (
+					<div key={item.product.id}>
+						<span>{item.product.name}</span>
+						<input
+							data-testid='item-count'
+							type='number'
+							min='1'
+							max='999'
+							value={item.count}
+							onChange={event =>
+								handleCountChange(item.product.id, Number(event.target.value))
+							}
+						/>
+						<button onClick={() => handleRemove(item.product.id)}>
+							Remove
+						</button>
+					</div>
+				))}
+			</div>
 
 			{/* Show when checkout is pending */}
 			{checkoutPending && <p>Checking out...</p>}
@@ -108,8 +130,11 @@ export default function Cart() {
 			{/* Show when checkout failed */}
 			{checkoutFailed && <p>Failed to checkout</p>}
 
-			{/* Checkout button */}
-			<button onClick={handleCheckout} disabled={checkoutPending}>
+			{/* Checkout button (disabled if checkout is pending or cart is empty) */}
+			<button
+				onClick={handleCheckout}
+				disabled={checkoutPending || cart.length === 0}
+			>
 				Checkout
 			</button>
 		</div>
