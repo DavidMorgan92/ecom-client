@@ -109,14 +109,9 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
 		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect cart items list to be shown
 		expect(screen.getByTestId('cart-list')).toBeInTheDocument();
-
-		// Expect checkout button to be shown and to be disabled
-		expect(screen.getByText('Checkout')).toBeDisabled();
 
 		// Wait for get pending message to disappear
 		await waitForElementToBeRemoved(screen.getByText('Loading cart...'));
@@ -138,8 +133,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
 		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect checkout button to be enabled
 		expect(screen.getByText('Checkout')).toBeEnabled();
@@ -176,8 +169,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
 		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect checkout button to be disabled
 		expect(screen.getByText('Checkout')).toBeDisabled();
@@ -209,8 +200,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect checkout button to be disabled
 		expect(screen.getByText('Checkout')).toBeDisabled();
@@ -245,8 +234,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect updateCart to have been called without the first cart item
 		expect(updateCartSpy).toHaveBeenCalledTimes(1);
@@ -303,8 +290,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
 		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 	});
 
 	it('dispatches updateCart when item count is changed', async () => {
@@ -338,8 +323,6 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 
 		// Expect updateCart to have been called without the first cart item
 		expect(updateCartSpy).toHaveBeenCalledTimes(1);
@@ -409,17 +392,19 @@ describe('Cart page', () => {
 		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
 		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
 	});
 
-	it('checks out when checkout is clicked', async () => {
+	it('navigates to checkout when checkout is clicked', async () => {
+		// Create history to track navigation
+		const history = createMemoryHistory();
+
 		// Render component
 		render(
-			<Provider store={mockStore}>
-				<Cart />
-			</Provider>,
-			{ wrapper: MemoryRouter },
+			<Router navigator={history} location={history.location}>
+				<Provider store={mockStore}>
+					<Cart />
+				</Provider>
+			</Router>,
 		);
 
 		// Wait for get pending message to disappear
@@ -428,76 +413,8 @@ describe('Cart page', () => {
 		// Click the checkout button
 		fireEvent.click(screen.getByText('Checkout'));
 
-		// Wait for checkout pending message to appear
-		await screen.findByText('Checking out...');
-
-		// Expect none of these messages to be shown
-		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
-		expect(screen.queryByText('Cart is empty')).not.toBeInTheDocument();
-		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
-
-		// Expect checkout button to be disabled
-		expect(screen.getByText('Checkout')).toBeDisabled();
-
-		// Wait for checkout pending message to disappear
-		await waitForElementToBeRemoved(screen.getByText('Checking out...'));
-
-		// Cart should empty when checkout is complete, expect no count inputs or remove buttons
-		expect(screen.queryByTestId('item-count')).not.toBeInTheDocument();
-		expect(screen.queryByText('Remove')).not.toBeInTheDocument();
-
-		// Expect cart empty message to be shown
-		expect(screen.queryByText('Cart is empty')).toBeInTheDocument();
-
-		// Expect none of these messages to be shown
-		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
-		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to checkout')).not.toBeInTheDocument();
-
-		// Expect checkout button to be disabled because cart is empty
-		expect(screen.getByText('Checkout')).toBeDisabled();
-	});
-
-	it('shows error message when checkout fails', async () => {
-		// Cause request to fail with 500
-		server.use(
-			rest.post(routes.checkout().href, (req, res, ctx) => {
-				return res(ctx.status(500));
-			}),
-		);
-
-		// Render component
-		render(
-			<Provider store={mockStore}>
-				<Cart />
-			</Provider>,
-			{ wrapper: MemoryRouter },
-		);
-
-		// Wait for get pending message to disappear
-		await waitForElementToBeRemoved(screen.getByText('Loading cart...'));
-
-		// Click the checkout button
-		fireEvent.click(screen.getByText('Checkout'));
-
-		// Wait for checkout pending message to disappear
-		await waitForElementToBeRemoved(screen.getByText('Checking out...'));
-
-		// Expect checkout failed message to be shown
-		expect(screen.getByText('Failed to checkout')).toBeInTheDocument();
-
-		// Expect none of these messages to be shown
-		expect(screen.queryByText('Loading cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to get cart')).not.toBeInTheDocument();
-		expect(screen.queryByText('Updating cart...')).not.toBeInTheDocument();
-		expect(screen.queryByText('Failed to update')).not.toBeInTheDocument();
-		expect(screen.queryByText('Checking out...')).not.toBeInTheDocument();
+		// Expect navigation to checkout page
+		expect(history.location.pathname).toBe('/checkout');
 	});
 
 	it("navigates to login page when user isn't authenticated", () => {

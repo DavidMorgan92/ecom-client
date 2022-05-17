@@ -11,6 +11,7 @@ import AccountAddresses from './routes/accountAddresses';
 import Products from './routes/products';
 import ProductDetails from './routes/productDetails';
 import Cart from './routes/cart';
+import Checkout from './routes/checkout';
 import NoMatch from './routes/noMatch';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
 							<Route path='products' element={<Products />} />
 							<Route path='product/:productId' element={<ProductDetails />} />
 							<Route path='cart' element={<Cart />} />
+							<Route path='checkout' element={<Checkout />} />
 							<Route path='*' element={<NoMatch />} />
 						</Route>
 					</Routes>

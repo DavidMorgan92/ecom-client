@@ -1,18 +1,15 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { selectAuthenticated } from '../../store/authSlice';
 import {
 	selectCart,
-	selectCheckoutCartFailed,
-	selectCheckoutCartPending,
 	selectGetCartFailed,
 	selectGetCartPending,
 	selectUpdateCartFailed,
 	selectUpdateCartPending,
 	getCart,
 	updateCart,
-	checkoutCart,
 } from '../../store/cartSlice';
 
 /**
@@ -28,11 +25,12 @@ export default function Cart() {
 	const getFailed = useSelector(selectGetCartFailed);
 	const updatePending = useSelector(selectUpdateCartPending);
 	const updateFailed = useSelector(selectUpdateCartFailed);
-	const checkoutPending = useSelector(selectCheckoutCartPending);
-	const checkoutFailed = useSelector(selectCheckoutCartFailed);
 
 	// Get information about auth state from the auth redux store
 	const authenticated = useSelector(selectAuthenticated);
+
+	// Use navigate to go to the checkout page when checkout is clicked
+	const navigate = useNavigate();
 
 	// Get cart on mount
 	useEffect(() => {
@@ -81,8 +79,8 @@ export default function Cart() {
 
 	// User clicked the checkout button
 	function handleCheckout() {
-		// Dispatch checkout thunk
-		dispatch(checkoutCart());
+		// Navigate to checkout page
+		navigate('/checkout');
 	}
 
 	return (
@@ -124,17 +122,8 @@ export default function Cart() {
 				))}
 			</div>
 
-			{/* Show when checkout is pending */}
-			{checkoutPending && <p>Checking out...</p>}
-
-			{/* Show when checkout failed */}
-			{checkoutFailed && <p>Failed to checkout</p>}
-
-			{/* Checkout button (disabled if checkout is pending or cart is empty) */}
-			<button
-				onClick={handleCheckout}
-				disabled={checkoutPending || cart.length === 0}
-			>
+			{/* Checkout button, disabled if cart is empty */}
+			<button onClick={handleCheckout} disabled={cart.length === 0}>
 				Checkout
 			</button>
 		</div>

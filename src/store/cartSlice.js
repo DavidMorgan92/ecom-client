@@ -18,12 +18,6 @@ const initialState = {
 	/** Did the last update request fail? */
 	updateCartFailed: false,
 
-	/** Is a checkout request pending? */
-	checkoutCartPending: false,
-
-	/** Did the last checkout request fail? */
-	checkoutCartFailed: false,
-
 	/** The cart items belonging to the authenticated user */
 	cart: [],
 };
@@ -59,19 +53,6 @@ export const updateCart = createAsyncThunk('cart/update', async items => {
 	};
 });
 
-/**
- * Dispatch this thunk to checkout the cart belonging to the authenticated user
- */
-export const checkoutCart = createAsyncThunk('cart/checkout', async () => {
-	// Checkout the cart through the ECOM cart service
-	const orderId = await cart.checkoutCart();
-
-	// Return the order ID as the action payload
-	return {
-		orderId,
-	};
-});
-
 const cartSlice = createSlice({
 	name: 'cart',
 	initialState,
@@ -92,6 +73,7 @@ const cartSlice = createSlice({
 		[getCart.fulfilled]: (state, action) => {
 			state.getCartPending = false;
 			state.getCartFailed = false;
+			state.updateCartFailed = false;
 			state.cart = action.payload.cart;
 		},
 
@@ -114,29 +96,6 @@ const cartSlice = createSlice({
 			state.cart = action.payload.cart;
 		},
 
-		/** The checkout cart request is pending a response */
-		[checkoutCart.pending]: state => {
-			state.checkoutCartPending = true;
-			state.checkoutCartFailed = false;
-			state.getCartFailed = false;
-			state.updateCartFailed = false;
-		},
-
-		/** The checkout cart request failed */
-		[checkoutCart.rejected]: state => {
-			state.checkoutCartPending = false;
-			state.checkoutCartFailed = true;
-		},
-
-		/** The checkout cart request succeeded */
-		[checkoutCart.fulfilled]: state => {
-			state.checkoutCartPending = false;
-			state.checkoutCartFailed = false;
-
-			// Empty the cart
-			state.cart = [];
-		},
-
 		/** A logout request from the auth slice is pending */
 		[logout.pending]: state => {
 			// Empty the stored cart items
@@ -156,13 +115,6 @@ export const selectUpdateCartPending = state => state.cart.updateCartPending;
 
 /** Select update cart failed state */
 export const selectUpdateCartFailed = state => state.cart.updateCartFailed;
-
-/** Select checkout cart pending state */
-export const selectCheckoutCartPending = state =>
-	state.cart.checkoutCartPending;
-
-/** Select checkout cart failed state */
-export const selectCheckoutCartFailed = state => state.cart.checkoutCartFailed;
 
 /** Select cart items */
 export const selectCart = state => state.cart.cart;
