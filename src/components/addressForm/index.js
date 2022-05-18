@@ -56,6 +56,7 @@ export default function AddressForm({
 			initialValues={initialValues}
 			onSubmit={handleSubmit}
 			validationSchema={addressSchema}
+			enableReinitialize={true}
 		>
 			{({ errors, touched }) => (
 				<Form>
