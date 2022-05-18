@@ -116,4 +116,12 @@ describe('AddressForm component', () => {
 		expect(handleCancel).toHaveBeenCalledTimes(1);
 		expect(handleSubmit).not.toHaveBeenCalled();
 	});
+
+	it('hides cancel button when hideCancel is true', () => {
+		// Render component
+		render(<AddressForm hideCancel={true} />);
+
+		// Expect cancel button to be hidden
+		expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
+	})
 });

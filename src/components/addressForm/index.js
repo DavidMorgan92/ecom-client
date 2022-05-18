@@ -27,7 +27,13 @@ const addressSchema = Yup.object().shape({
  *
  * For editing an address
  */
-export default function AddressForm({ address, onSubmit, onCancel, disabled }) {
+export default function AddressForm({
+	address,
+	onSubmit,
+	onCancel,
+	disabled,
+	hideCancel,
+}) {
 	// Initial empty values for the form
 	const initialValues = {
 		houseNameNumber: '',
@@ -92,10 +98,12 @@ export default function AddressForm({ address, onSubmit, onCancel, disabled }) {
 					{/* Submit button */}
 					<input type='submit' value='Submit' disabled={disabled} />
 
-					{/* Cancel button */}
-					<button type='button' onClick={onCancel} disabled={disabled}>
-						Cancel
-					</button>
+					{/* Cancel button (hide if hideCancel is true) */}
+					{hideCancel || (
+						<button type='button' onClick={onCancel} disabled={disabled}>
+							Cancel
+						</button>
+					)}
 				</Form>
 			)}
 		</Formik>
