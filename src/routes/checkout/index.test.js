@@ -7,6 +7,8 @@ import authSlice from '../../store/authSlice';
 import cartSlice from '../../store/cartSlice';
 import addressesSlice from '../../store/addressesSlice';
 import Checkout from '.';
+import * as mocks from '../../../test/mocks';
+import { Elements } from '@stripe/react-stripe-js';
 
 // Mock store for an authenticated user
 const mockStore = configureStore({
@@ -63,13 +65,29 @@ const mockStore = configureStore({
 	},
 });
 
+// Stripe mocks
+let mockStripe;
+let mockElements;
+
+beforeEach(() => {
+	mockStripe = mocks.mockStripe();
+	mockElements = mocks.mockElements();
+	mockStripe.elements.mockReturnValue(mockElements);
+});
+
+afterEach(() => {
+	jest.restoreAllMocks();
+});
+
 describe('Checkout page', () => {
 	it('shows the ChooseAddress page on mount', () => {
 		// Render component
 		render(
-			<Provider store={mockStore}>
-				<Checkout />
-			</Provider>,
+			<Elements stripe={mockStripe}>
+				<Provider store={mockStore}>
+					<Checkout />
+				</Provider>
+			</Elements>,
 			{ wrapper: MemoryRouter },
 		);
 
@@ -80,9 +98,11 @@ describe('Checkout page', () => {
 	it('shows the ConfirmPayment page when an address is chosen', () => {
 		// Render component
 		render(
-			<Provider store={mockStore}>
-				<Checkout />
-			</Provider>,
+			<Elements stripe={mockStripe}>
+				<Provider store={mockStore}>
+					<Checkout />
+				</Provider>
+			</Elements>,
 			{ wrapper: MemoryRouter },
 		);
 
@@ -101,9 +121,11 @@ describe('Checkout page', () => {
 	it('goes back to ChooseAddress page when back button is clicked', () => {
 		// Render component
 		render(
-			<Provider store={mockStore}>
-				<Checkout />
-			</Provider>,
+			<Elements stripe={mockStripe}>
+				<Provider store={mockStore}>
+					<Checkout />
+				</Provider>
+			</Elements>,
 			{ wrapper: MemoryRouter },
 		);
 
@@ -135,11 +157,13 @@ describe('Checkout page', () => {
 
 		// Render component
 		render(
-			<Router navigator={history} location={history.location}>
-				<Provider store={unauthenticatedStore}>
-					<Checkout />
-				</Provider>
-			</Router>,
+			<Elements stripe={mockStripe}>
+				<Router navigator={history} location={history.location}>
+					<Provider store={unauthenticatedStore}>
+						<Checkout />
+					</Provider>
+				</Router>
+			</Elements>,
 		);
 
 		// Expect redirect to login page with redirect back to checkout page
