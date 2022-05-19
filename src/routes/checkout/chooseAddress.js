@@ -17,6 +17,12 @@ import {
 } from '../../store/addressesSlice';
 import AddressForm from '../../components/addressForm';
 
+/**
+ * ChooseAddress page component
+ * 
+ * First step of the checkout process
+ * Allows user to choose a delivery address for their order
+ */
 export default function ChooseAddress({ onContinueToPayment }) {
 	// Get cart to show user for confirmation
 	const cart = useSelector(selectCart);

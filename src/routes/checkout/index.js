@@ -7,6 +7,9 @@ import ConfirmPayment from './confirmPayment';
 
 /**
  * Checkout page component
+ * 
+ * First shows user the ChooseAddress page to choose a delivery address
+ * Then shows the user the ConfirmPayment page to input their payment details
  */
 export default function Checkout() {
 	// Store user's selected address in state
