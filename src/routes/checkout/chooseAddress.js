@@ -16,6 +16,7 @@ import {
 	selectGetAddressesPending,
 } from '../../store/addressesSlice';
 import AddressForm from '../../components/addressForm';
+import { totalPricePennies } from '../../util';
 
 /**
  * ChooseAddress page component
@@ -81,6 +82,9 @@ export default function ChooseAddress({ onContinueToPayment }) {
 
 	// Handle continue to payment
 	function handleContinueToPayment() {
+		// Get total price of cart
+		const totalPrice = totalPricePennies(cart);
+
 		// If user has given a new address and not selected an existing address
 		if (newAddress && selectedAddressIndex === -1) {
 			// Send new address to API
@@ -88,12 +92,12 @@ export default function ChooseAddress({ onContinueToPayment }) {
 				.unwrap()
 				.then(payload => {
 					// Continue to payment with new address
-					onContinueToPayment(payload.address);
+					onContinueToPayment(payload.address, totalPrice);
 				})
 				.catch(() => {});
 		} else if (selectedAddressIndex !== -1) {
 			// Continue to payment with selected existing address
-			onContinueToPayment(addresses[selectedAddressIndex]);
+			onContinueToPayment(addresses[selectedAddressIndex], totalPrice);
 		} else {
 			// Show that user has not chosen an address
 		}

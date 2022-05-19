@@ -299,7 +299,7 @@ describe('ChooseAddress page', () => {
 		// Click continue to payment button
 		fireEvent.click(screen.getByText('Continue to Payment'));
 
-		// Expect handler to be called with selected address
+		// Expect handler to be called with selected address and total price
 		expect(handleContinueToPayment).toHaveBeenCalledTimes(1);
 		expect(handleContinueToPayment).toHaveBeenCalledWith({
 			id: addresses[0].id,
@@ -307,7 +307,7 @@ describe('ChooseAddress page', () => {
 			streetName: addresses[0].streetName,
 			townCityName: addresses[0].townCityName,
 			postCode: addresses[0].postCode,
-		});
+		}, 591);
 	});
 
 	it('shows the newly input address when it is submitted', async () => {
@@ -374,7 +374,7 @@ describe('ChooseAddress page', () => {
 		// Expect continue to payment button to be disabled
 		expect(screen.getByText('Continue to Payment')).toBeDisabled();
 
-		// Expect handler to be called with selected address
+		// Expect handler to be called with selected address and total price
 		await waitFor(() => {
 			expect(handleContinueToPayment).toHaveBeenCalledTimes(1);
 		});
@@ -385,7 +385,7 @@ describe('ChooseAddress page', () => {
 			streetName: 'Upper Union Street',
 			townCityName: 'Merthyr Tydfil',
 			postCode: 'CF48 3LE',
-		});
+		}, 591);
 
 		// Expect failed to save new address message not to be shown
 		expect(
