@@ -1,4 +1,4 @@
-import { formatPrice } from './util';
+import { formatPrice, totalPricePennies } from './util';
 
 describe('formatPrice', () => {
 	it('produces the correct string', () => {
@@ -23,5 +23,17 @@ describe('formatPrice', () => {
 		const pricePennies = '1234';
 		const result = formatPrice(pricePennies);
 		expect(result).toEqual('£12.34');
+	});
+});
+
+describe('totalPricePennies', () => {
+	it('produces the correct total', () => {
+		const items = [
+			{ count: 1, product: { pricePennies: '100' } },
+			{ count: 2, product: { pricePennies: '22' } },
+			{ count: 1, product: { pricePennies: '011' } },
+		];
+		const result = totalPricePennies(items);
+		expect(result).toEqual(155);
 	});
 });
