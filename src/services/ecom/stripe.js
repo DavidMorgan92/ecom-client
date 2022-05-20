@@ -16,6 +16,7 @@ export async function createIntent(pricePennies) {
 	// Send total order price to API server
 	const response = await fetch(routes.createIntent(), {
 		method: 'POST',
+		credentials: 'include',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			pricePennies,
