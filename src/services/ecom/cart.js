@@ -60,10 +60,11 @@ export async function updateCart(items) {
 /**
  * Checkout the cart belonging to the authenticated user
  * @param {number} addressId ID of the delivery address for the order
+ * @param {string} paymentIntentId ID of the Stripe payment intent associated with the order
  * @returns ID of the created order
  * @throws Will throw if network response is not OK
  */
-export async function checkoutCart(addressId) {
+export async function checkoutCart(addressId, paymentIntentId) {
 	// Send post request to API endpoint
 	const response = await fetch(routes.checkout(), {
 		method: 'POST',
@@ -71,6 +72,7 @@ export async function checkoutCart(addressId) {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			addressId,
+			paymentIntentId,
 		}),
 	});
 

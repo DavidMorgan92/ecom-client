@@ -68,9 +68,6 @@ export default function ConfirmPayment({
 		// Set processing state
 		setProcessing(true);
 
-		// TODO: Attach UUID metadata to payment intent and order in DB
-		// TODO: Include receipt email address in payment intent
-
 		// Confirm payment through Stripe
 		const payload = await stripe.confirmCardPayment(clientSecret, {
 			payment_method: {
@@ -99,7 +96,10 @@ export default function ConfirmPayment({
 			setSucceeded(true);
 
 			// Checkout cart on ecom server
-			dispatch(checkoutCart(deliveryAddress.id))
+			dispatch(checkoutCart({
+				addressId: deliveryAddress.id,
+				paymentIntentId: payload.paymentIntent.id,
+			}))
 				.unwrap()
 				.then(payload => {
 					// TODO: Go to order page of payload.orderId

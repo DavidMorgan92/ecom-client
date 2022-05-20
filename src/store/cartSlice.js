@@ -64,9 +64,9 @@ export const updateCart = createAsyncThunk('cart/update', async items => {
  */
 export const checkoutCart = createAsyncThunk(
 	'cart/checkout',
-	async addressId => {
+	async ({ addressId, paymentIntentId }) => {
 		// Checkout the cart through the ECOM cart service
-		const orderId = await cart.checkoutCart(addressId);
+		const orderId = await cart.checkoutCart(addressId, paymentIntentId);
 
 		// Return the order ID as the action payload
 		return {
