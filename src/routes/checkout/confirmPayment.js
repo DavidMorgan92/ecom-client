@@ -68,13 +68,21 @@ export default function ConfirmPayment({
 		// Set processing state
 		setProcessing(true);
 
-		// TODO: Attach billing address to payment intent
 		// TODO: Attach UUID metadata to payment intent and order in DB
+		// TODO: Include receipt email address in payment intent
 
 		// Confirm payment through Stripe
 		const payload = await stripe.confirmCardPayment(clientSecret, {
 			payment_method: {
 				card: elements.getElement(CardElement),
+				billing_details: {
+					address: {
+						line1: billingAddress.houseNameNumber,
+						line2: billingAddress.streetName,
+						city: billingAddress.townCityName,
+						postal_code: billingAddress.postCode,
+					},
+				},
 			},
 		});
 
