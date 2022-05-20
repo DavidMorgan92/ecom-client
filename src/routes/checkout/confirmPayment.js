@@ -1,5 +1,6 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useEffect, useState } from 'react';
+import AddressPicker from '../../components/addressPicker';
 import { createIntent } from '../../services/ecom/stripe';
 import { formatPrice } from '../../util';
 
@@ -9,7 +10,11 @@ import { formatPrice } from '../../util';
  * Second step of the checkout process
  * Allows user to input their payment details to complete the purchase
  */
-export default function ConfirmPayment({ onBackClick, pricePennies }) {
+export default function ConfirmPayment({
+	onBackClick,
+	pricePennies,
+	deliveryAddress,
+}) {
 	// Store client secret from payment intent in state
 	const [clientSecret, setClientSecret] = useState(null);
 
@@ -18,6 +23,9 @@ export default function ConfirmPayment({ onBackClick, pricePennies }) {
 	const [error, setError] = useState(null);
 	const [processing, setProcessing] = useState(false);
 	const [disabled, setDisabled] = useState(false);
+
+	// Store billing address in state
+	const [billingAddress, setBillingAddress] = useState(null);
 
 	// Use Stripe
 	const stripe = useStripe();
@@ -47,6 +55,11 @@ export default function ConfirmPayment({ onBackClick, pricePennies }) {
 		// Prevent default form submission action
 		event.preventDefault();
 
+		// Require user to choose a billing address
+		if (!billingAddress) {
+			return;
+		}
+
 		// Set processing state
 		setProcessing(true);
 
@@ -65,17 +78,39 @@ export default function ConfirmPayment({ onBackClick, pricePennies }) {
 			// Clear error state and set succeeded state
 			setError(null);
 			setSucceeded(true);
+
+			// TODO: Checkout cart on ecom server
 		}
 
 		// Clear processing state
 		setProcessing(false);
 	}
 
+	// User chose a billing address
+	function handleAddressChange(address) {
+		setBillingAddress(address);
+	}
+
 	return (
 		<>
-			<h2>Confirm Payment</h2>
+			{/* Allow user to pick billing address */}
+			<AddressPicker onChange={handleAddressChange} />
+
+			{/* Show address user has chosen for clarity */}
+			<h2>Billing to...</h2>
+			{billingAddress ? (
+				<div data-testid='billing-address'>
+					<span>{billingAddress.houseNameNumber}</span>
+					<span>{billingAddress.streetName}</span>
+					<span>{billingAddress.townCityName}</span>
+					<span>{billingAddress.postCode}</span>
+				</div>
+			) : (
+				<p>Please choose a billing address</p>
+			)}
 
 			{/* Show total price for user's confirmation */}
+			<h2>Confirm Payment</h2>
 			<p>Total price: {formatPrice(pricePennies)}</p>
 
 			{/* Credit card form */}

@@ -12,8 +12,8 @@ import ConfirmPayment from './confirmPayment';
  * Then shows the user the ConfirmPayment page to input their payment details
  */
 export default function Checkout() {
-	// Store user's selected address in state
-	const [selectedAddress, setSelectedAddress] = useState(null);
+	// Store user's delivery address in state
+	const [deliveryAddress, setDeliveryAddress] = useState(null);
 
 	// Store total price of cart in state when the address is confirmed
 	const [pricePennies, setPricePennies] = useState(0);
@@ -29,7 +29,7 @@ export default function Checkout() {
 	// User has chosen a delivery address
 	function handleContinueToPayment(address, pricePennies) {
 		// Save address to be used in confirm payment page
-		setSelectedAddress(address);
+		setDeliveryAddress(address);
 
 		// Save total cart price
 		setPricePennies(pricePennies);
@@ -38,10 +38,10 @@ export default function Checkout() {
 	// User chose to go back from payment confirmation
 	function handleBackClick() {
 		// Clear address to be chosen again on ChooseAddress page
-		setSelectedAddress(null);
+		setDeliveryAddress(null);
 	}
 
-	if (!selectedAddress) {
+	if (!deliveryAddress) {
 		// Show when user has not chosen a delivery address
 		return <ChooseAddress onContinueToPayment={handleContinueToPayment} />;
 	} else {
@@ -50,6 +50,7 @@ export default function Checkout() {
 			<ConfirmPayment
 				onBackClick={handleBackClick}
 				pricePennies={pricePennies}
+				deliveryAddress={deliveryAddress}
 			/>
 		);
 	}
