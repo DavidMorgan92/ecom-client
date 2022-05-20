@@ -18,6 +18,12 @@ const initialState = {
 	/** Did the last update request fail? */
 	updateCartFailed: false,
 
+	/** Is a checkout cart request pending? */
+	checkoutCartPending: false,
+
+	/** Did the last checkout request fail? */
+	checkoutCartFailed: false,
+
 	/** The cart items belonging to the authenticated user */
 	cart: [],
 };
@@ -52,6 +58,22 @@ export const updateCart = createAsyncThunk('cart/update', async items => {
 		cart: cartInfo,
 	};
 });
+
+/**
+ * Dispatch this thunk to checkout a cart belonging to the authenticated user
+ */
+export const checkoutCart = createAsyncThunk(
+	'cart/checkout',
+	async addressId => {
+		// Checkout the cart through the ECOM cart service
+		const orderId = await cart.checkoutCart(addressId);
+
+		// Return the order ID as the action payload
+		return {
+			orderId,
+		};
+	},
+);
 
 const cartSlice = createSlice({
 	name: 'cart',
@@ -94,6 +116,24 @@ const cartSlice = createSlice({
 			state.updateCartPending = false;
 			state.updateCartFailed = false;
 			state.cart = action.payload.cart;
+		},
+
+		/** The checkout cart request is pending a response */
+		[checkoutCart.pending]: state => {
+			state.checkoutCartPending = true;
+			state.checkoutCartFailed = false;
+		},
+
+		/** The checkout cart request failed */
+		[checkoutCart.rejected]: state => {
+			state.checkoutCartPending = false;
+			state.checkoutCartFailed = true;
+		},
+
+		/** The checkout cart request succeeded */
+		[checkoutCart.fulfilled]: state => {
+			state.checkoutCartPending = false;
+			state.checkoutCartFailed = false;
 		},
 
 		/** A logout request from the auth slice is pending */

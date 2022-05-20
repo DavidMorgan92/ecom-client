@@ -1,8 +1,10 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import AddressPicker from '../../components/addressPicker';
 import { createIntent } from '../../services/ecom/stripe';
 import { formatPrice } from '../../util';
+import { checkoutCart } from '../../store/cartSlice';
 
 /**
  * ConfirmPayment page component
@@ -30,6 +32,9 @@ export default function ConfirmPayment({
 	// Use Stripe
 	const stripe = useStripe();
 	const elements = useElements();
+
+	// Use dispatch to checkout cart
+	const dispatch = useDispatch();
 
 	// Create payment intent on server and store client secret
 	useEffect(() => {
@@ -63,6 +68,9 @@ export default function ConfirmPayment({
 		// Set processing state
 		setProcessing(true);
 
+		// TODO: Attach billing address to payment intent
+		// TODO: Attach UUID metadata to payment intent and order in DB
+
 		// Confirm payment through Stripe
 		const payload = await stripe.confirmCardPayment(clientSecret, {
 			payment_method: {
@@ -74,16 +82,26 @@ export default function ConfirmPayment({
 		if (payload.error) {
 			// Set error state
 			setError(`Payment failed ${payload.error.message}`);
+
+			// Clear processing state
+			setProcessing(false);
 		} else {
 			// Clear error state and set succeeded state
 			setError(null);
 			setSucceeded(true);
 
-			// TODO: Checkout cart on ecom server
+			// Checkout cart on ecom server
+			dispatch(checkoutCart(deliveryAddress.id))
+				.unwrap()
+				.then(payload => {
+					// TODO: Go to order page of payload.orderId
+				})
+				.catch(() => {})
+				.finally(() => {
+					// Clear processing state
+					setProcessing(false);
+				});
 		}
-
-		// Clear processing state
-		setProcessing(false);
 	}
 
 	// User chose a billing address

@@ -59,14 +59,19 @@ export async function updateCart(items) {
 
 /**
  * Checkout the cart belonging to the authenticated user
+ * @param {number} addressId ID of the delivery address for the order
  * @returns ID of the created order
  * @throws Will throw if network response is not OK
  */
-export async function checkoutCart() {
+export async function checkoutCart(addressId) {
 	// Send post request to API endpoint
 	const response = await fetch(routes.checkout(), {
 		method: 'POST',
 		credentials: 'include',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			addressId,
+		}),
 	});
 
 	// Throw if response is not OK
