@@ -12,6 +12,7 @@ export default function Account() {
 			<nav>
 				<NavLink to='/account/details'>Details</NavLink>
 				<NavLink to='/account/addresses'>Addresses</NavLink>
+				<NavLink to='/account/orders'>Orders</NavLink>
 			</nav>
 
 			{/* Render sub page */}

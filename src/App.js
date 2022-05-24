@@ -14,6 +14,7 @@ import Products from './routes/products';
 import ProductDetails from './routes/productDetails';
 import Cart from './routes/cart';
 import Checkout from './routes/checkout';
+import Orders from './routes/orders';
 import NoMatch from './routes/noMatch';
 
 // Initialize Stripe
@@ -35,6 +36,7 @@ function App() {
 									<Route index element={<AccountDetails />} />
 									<Route path='details' element={<AccountDetails />} />
 									<Route path='addresses' element={<AccountAddresses />} />
+									<Route path='orders' element={<Orders />} />
 								</Route>
 								<Route path='products' element={<Products />} />
 								<Route path='product/:productId' element={<ProductDetails />} />

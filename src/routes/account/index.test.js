@@ -39,4 +39,22 @@ describe('Account page', () => {
 		// Expect navigation to /account/addresses
 		expect(history.location.pathname).toBe('/account/addresses');
 	});
+
+	it('navigates to /account/orders when orders link is clicked', () => {
+		// Create history to track navigation
+		const history = createMemoryHistory();
+
+		// Render component
+		render(
+			<Router navigator={history} location={history.location}>
+				<Account />
+			</Router>,
+		);
+
+		// Click the Orders link
+		fireEvent.click(screen.getByText('Orders'));
+
+		// Expect navigation to /account/orders
+		expect(history.location.pathname).toBe('/account/orders');
+	});
 });
