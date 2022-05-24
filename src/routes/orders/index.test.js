@@ -1,10 +1,11 @@
 import {
+	fireEvent,
 	render,
 	screen,
 	waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { MemoryRouter, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { configureStore } from '@reduxjs/toolkit';
 import { rest } from 'msw';
@@ -82,6 +83,7 @@ describe('Orders page', () => {
 			<Provider store={mockStore}>
 				<Orders />
 			</Provider>,
+			{ wrapper: MemoryRouter },
 		);
 
 		// Wait for loading message to appear
@@ -109,6 +111,30 @@ describe('Orders page', () => {
 		expect(screen.queryByText('Loading orders...')).not.toBeInTheDocument();
 		expect(screen.queryByText('Failed to load orders')).not.toBeInTheDocument();
 		expect(screen.queryByText('No orders')).not.toBeInTheDocument();
+	});
+
+	it('navigates to order details page when details button is clicked', async () => {
+		// Create history to track navigation
+		const history = createMemoryHistory();
+
+		// Render component
+		render(
+			<Router navigator={history} location={history.location}>
+				<Provider store={mockStore}>
+					<Orders />
+				</Provider>
+			</Router>,
+		);
+
+		// Wait for loading message to appear
+		await screen.findByText('Loading orders...');
+
+		// Wait for loading message to disappear
+		await waitForElementToBeRemoved(screen.getByText('Loading orders...'));
+
+		fireEvent.click(screen.getAllByText('Details')[0]);
+
+		expect(history.location.pathname).toEqual('/account/order/1');
 	});
 
 	it("navigates to login page when user isn't authenticated", () => {

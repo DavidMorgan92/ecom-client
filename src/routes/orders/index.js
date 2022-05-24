@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { selectAuthenticated } from '../../store/authSlice';
 import {
 	getOrders,
@@ -26,6 +26,9 @@ export default function Orders() {
 	// Use dispatch to get orders from the API
 	const dispatch = useDispatch();
 
+	// Use navigate to go to order details page when details button is clicked
+	const navigate = useNavigate();
+
 	// Get orders on mount
 	useEffect(() => {
 		// User will be redirected to login page if not authenticated, so don't get orders
@@ -43,7 +46,8 @@ export default function Orders() {
 
 	// User clicked the order details button
 	function handleDetailsClick(orderId) {
-		// TODO: Navigate to order details page
+		// Navigate to order details page
+		navigate(`/account/order/${orderId}`);
 	}
 
 	return (
