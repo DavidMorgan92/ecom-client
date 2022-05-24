@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 import AddressPicker from '../../components/addressPicker';
 import { createIntent } from '../../services/ecom/stripe';
 import { formatPrice } from '../../util';
-import { checkoutCart } from '../../store/cartSlice';
+import { checkoutCart, getCart } from '../../store/cartSlice';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * ConfirmPayment page component
@@ -35,6 +36,9 @@ export default function ConfirmPayment({
 
 	// Use dispatch to checkout cart
 	const dispatch = useDispatch();
+
+	// Use navigate to go to order details page when order is complete
+	const navigate = useNavigate();
 
 	// Create payment intent on server and store client secret
 	useEffect(() => {
@@ -96,13 +100,19 @@ export default function ConfirmPayment({
 			setSucceeded(true);
 
 			// Checkout cart on ecom server
-			dispatch(checkoutCart({
-				addressId: deliveryAddress.id,
-				paymentIntentId: payload.paymentIntent.id,
-			}))
+			dispatch(
+				checkoutCart({
+					addressId: deliveryAddress.id,
+					paymentIntentId: payload.paymentIntent.id,
+				}),
+			)
 				.unwrap()
 				.then(payload => {
-					// TODO: Go to order page of payload.orderId
+					// Dispatch get cart to refresh cart views now that it is empty
+					dispatch(getCart());
+
+					// Go to order details page of new order
+					navigate(`/account/order/${payload.orderId}`);
 				})
 				.catch(() => {})
 				.finally(() => {
