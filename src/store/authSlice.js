@@ -41,6 +41,19 @@ export const login = createAsyncThunk(
 );
 
 /**
+ * Dispatch this thunk with a Google auth token to login
+ */
+export const googleLogin = createAsyncThunk('auth/googleLogin', async token => {
+	// Login through ECOM auth service
+	const email = await auth.googleLogin(token);
+
+	// Return the email address as the action payload
+	return {
+		email,
+	};
+});
+
+/**
  * Dispatch this thunk to request logout
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -91,7 +104,27 @@ const authSlice = createSlice({
 
 		/** The login request succeeded */
 		[login.fulfilled]: (state, action) => {
-			// action.payload is a boolean indicating the success of the login request
+			state.authenticated = true;
+			state.authPending = false;
+			state.authFailed = false;
+			state.email = action.payload.email;
+		},
+
+		[googleLogin.pending]: state => {
+			state.authenticated = false;
+			state.authPending = true;
+			state.authFailed = false;
+			state.email = null;
+		},
+
+		[googleLogin.rejected]: state => {
+			state.authenticated = false;
+			state.authPending = false;
+			state.authFailed = true;
+			state.email = null;
+		},
+
+		[googleLogin.fulfilled]: (state, action) => {
 			state.authenticated = true;
 			state.authPending = false;
 			state.authFailed = false;

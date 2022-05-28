@@ -13,6 +13,7 @@
 		"msw": "^0.39.2",
 		"react": "^18.0.0",
 		"react-dom": "^18.0.0",
+		"react-google-login": "https://github.com/DavidMorgan92/react-google-login/tarball/f092985f644281ffeba530f4b227be925fae249c",
 		"react-redux": "^7.2.8",
 		"react-router-dom": "^6.3.0",
 		"react-scripts": "5.0.0",

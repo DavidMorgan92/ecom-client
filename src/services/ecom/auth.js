@@ -4,6 +4,7 @@
 export const routes = {
 	base: () => process.env.REACT_APP_ECOM_API_URL,
 	login: () => new URL('/auth/login', routes.base()),
+	googleLogin: () => new URL('/auth/google', routes.base()),
 	logout: () => new URL('/auth/logout', routes.base()),
 	register: () => new URL('/auth/register', routes.base()),
 };
@@ -30,6 +31,34 @@ export async function login(email, password) {
 	if (!response.ok) {
 		throw new Error(`POST ${routes.login()} response not OK`);
 	}
+}
+
+/**
+ * Send a google auth token to the API endpoint to login
+ * @param {string} token Authorization token obtained from Google
+ * @returns Email address of the user
+ */
+export async function googleLogin(token) {
+	// Send login request to API endpoint
+	const response = await fetch(routes.googleLogin(), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({
+			token,
+		}),
+	});
+
+	// Throw if response is not OK
+	if (!response.ok) {
+		throw new Error(`POST ${routes.googleLogin()} response not OK`);
+	}
+
+	// Get email address returned from server
+	const email = await response.text();
+
+	// Return email address
+	return email;
 }
 
 /**

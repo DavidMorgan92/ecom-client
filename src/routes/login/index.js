@@ -6,7 +6,9 @@ import {
 	login,
 	selectAuthPending,
 	selectAuthFailed,
+	googleLogin,
 } from '../../store/authSlice';
+import GoogleLogin from 'react-google-login';
 
 /**
  * Validation schema for login form
@@ -55,40 +57,66 @@ export default function Login() {
 			.catch(() => {});
 	}
 
+	// Handle Google login button click
+	function handleGoogleLogin(googleData) {
+		// If login was successful
+		if (!googleData.error) {
+			// Dispatch login method from auth redux store
+			dispatch(googleLogin(googleData.tokenId))
+				.unwrap()
+				.then(() => {
+					// Navigate to redirect query parameter or home
+					navigate(redirectParam || '/');
+				})
+				.catch(() => {});
+		}
+	}
+
 	return (
-		<Formik
-			initialValues={{ email: '', password: '' }}
-			onSubmit={handleSubmit}
-			validationSchema={loginSchema}
-		>
-			{({ errors, touched }) => (
-				<Form>
-					{/* Email input field */}
-					<label htmlFor='email'>Email</label>
-					<Field id='email' name='email' type='email' />
+		<>
+			<Formik
+				initialValues={{ email: '', password: '' }}
+				onSubmit={handleSubmit}
+				validationSchema={loginSchema}
+			>
+				{({ errors, touched }) => (
+					<Form>
+						{/* Email input field */}
+						<label htmlFor='email'>Email</label>
+						<Field id='email' name='email' type='email' />
 
-					{/* Email input field validation errors */}
-					{errors.email && touched.email ? <span>{errors.email}</span> : null}
+						{/* Email input field validation errors */}
+						{errors.email && touched.email ? <span>{errors.email}</span> : null}
 
-					{/* Password input field */}
-					<label htmlFor='password'>Password</label>
-					<Field id='password' name='password' type='password' />
+						{/* Password input field */}
+						<label htmlFor='password'>Password</label>
+						<Field id='password' name='password' type='password' />
 
-					{/* Password input field validation errors */}
-					{errors.password && touched.password ? (
-						<span>{errors.password}</span>
-					) : null}
+						{/* Password input field validation errors */}
+						{errors.password && touched.password ? (
+							<span>{errors.password}</span>
+						) : null}
 
-					{/* Submit button (disable when authentication is pending) */}
-					<input type='submit' value='Submit' disabled={authPending} />
+						{/* Submit button (disable when authentication is pending) */}
+						<input type='submit' value='Submit' disabled={authPending} />
 
-					{/* Display when authentication is pending */}
-					{authPending && <p>Logging in...</p>}
+						{/* Display when authentication is pending */}
+						{authPending && <p>Logging in...</p>}
 
-					{/* Display when authentication has failed */}
-					{authFailed && <p>Failed to login</p>}
-				</Form>
-			)}
-		</Formik>
+						{/* Display when authentication has failed */}
+						{authFailed && <p>Failed to login</p>}
+					</Form>
+				)}
+			</Formik>
+
+			{/* Google login button */}
+			<GoogleLogin
+				clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
+				onSuccess={handleGoogleLogin}
+				onFailure={handleGoogleLogin}
+				cookiePolicy='single_host_origin'
+				pluginName={process.env.REACT_APP_GOOGLE_PLUGIN_NAME}
+			/>
+		</>
 	);
 }
