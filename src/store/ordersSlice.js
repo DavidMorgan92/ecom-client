@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as orders from '../services/ecom/orders';
+import { logout } from './authSlice';
 
 /**
  * Initial state of the orders slice
@@ -100,6 +101,12 @@ const ordersSlice = createSlice({
 				// Add the new information to the downloaded set
 				state.orders.push(action.payload.order);
 			}
+		},
+
+		/** A logout request from the auth slice is pending */
+		[logout.pending]: state => {
+			// Empty the stored orders items
+			state.orders = [];
 		},
 	},
 });
